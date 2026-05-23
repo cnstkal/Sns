@@ -3,218 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" id="meta-theme-color" content="#000000">
 <title>CLOW Archive</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-/* ===== CSS VARIABLES ===== */
+/* ============================================================
+   CSS VARIABLES
+   ============================================================ */
 :root {
-  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  --transition: 0.2s ease;
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tr: 0.2s ease;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --nav-h: 56px; /* bottom nav height */
+  --top-h: 52px; /* top platform bar (mobile hidden) */
 }
 
-/* LIGHT MODE */
+/* ---- LIGHT ---- */
 [data-theme="light"] {
-  --bg: #ffffff;
-  --bg2: #f7f7f7;
-  --bg3: #efefef;
-  --border: #e1e1e1;
-  --text: #0f0f0f;
-  --text2: #536471;
-  --text3: #8b98a5;
+  --bg: #fafafa;
+  --bg2: #f2f2f2;
+  --bg3: #e8e8e8;
+  --border: #dbdbdb;
+  --text: #111111;
+  --text2: #737373;
+  --text3: #a8a8a8;
   --card: #ffffff;
-  --hover: #f7f9f9;
-  --accent: #1d9bf0;
+  --hover: #f5f5f5;
+  --tw-accent: #1d9bf0;
+  --wv-accent: #9b59b6;
   --shadow: rgba(0,0,0,0.08);
 }
 
-/* DARK MODE */
+/* ---- DARK ---- */
 [data-theme="dark"] {
   --bg: #000000;
-  --bg2: #16181c;
-  --bg3: #202327;
-  --border: #2f3336;
-  --text: #e7e9ea;
-  --text2: #71767b;
-  --text3: #536471;
-  --card: #16181c;
-  --hover: #080808;
-  --accent: #1d9bf0;
-  --shadow: rgba(255,255,255,0.03);
+  --bg2: #121212;
+  --bg3: #1e1e1e;
+  --border: #262626;
+  --text: #f1f1f1;
+  --text2: #8e8e8e;
+  --text3: #555555;
+  --card: #111111;
+  --hover: #0a0a0a;
+  --tw-accent: #1d9bf0;
+  --wv-accent: #b37fd4;
+  --shadow: rgba(255,255,255,0.04);
 }
 
-/* ===== RESET ===== */
+/* ============================================================
+   RESET
+   ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { 
-  -webkit-text-size-adjust: 100%; 
-  touch-action: pan-y;
+
+html {
+  -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
+  height: 100%;
 }
+
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  transition: background var(--transition), color var(--transition);
   overflow-x: hidden;
-  min-height: 100vh;
+  min-height: 100%;
+  min-height: 100dvh;
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y;
+  transition: background 0.25s, color 0.25s;
 }
-button { font-family: var(--font); cursor: pointer; border: none; background: none; }
-input, textarea { font-family: var(--font); }
+
+button { font-family: var(--font); cursor: pointer; border: none; background: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, select { font-family: var(--font); -webkit-appearance: none; }
 img { max-width: 100%; display: block; }
 a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; -ms-overflow-style: none; }
 
-/* ===== PLATFORM TABS ===== */
-#platform-tabs {
+/* ============================================================
+   LAYOUT — MOBILE-FIRST
+   ============================================================ */
+/* On mobile: top platform-bar hidden, use bottom nav */
+/* On desktop: top platform-bar visible, bottom nav hidden */
+
+#platform-tabs-desktop {
+  display: none; /* hidden on mobile */
+}
+
+/* ---- BOTTOM NAV (mobile) ---- */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 2000;
+  height: calc(var(--nav-h) + var(--safe-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.bn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 500;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.bn-item.active { color: var(--text); }
+.bn-item svg { width: 24px; height: 24px; }
+
+.bn-icon-wrap {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+
+/* Twitter bottom tab indicator */
+#bn-twitter.active .bn-icon-wrap::after { content:''; position:absolute; bottom:-4px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background: var(--tw-accent); }
+
+/* ---- TOP HEADER (each platform has its own, mobile version) ---- */
+.mobile-header {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
+  height: calc(var(--top-h) + var(--safe-top));
+  padding-top: var(--safe-top);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  height: 52px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.tab-logo {
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
-
-.tab-btns {
-  display: flex;
-  gap: 2px;
-  background: var(--bg3);
-  border-radius: 20px;
-  padding: 3px;
-}
-
-.tab-btn {
-  padding: 5px 14px;
-  border-radius: 17px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.tab-btn.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px var(--shadow); }
-
-.tab-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.theme-btn {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text2);
-  font-size: 16px;
-  transition: all 0.2s;
-}
-.theme-btn:hover { background: var(--bg3); }
-
-.admin-btn {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--text);
-  color: var(--bg);
-  transition: opacity 0.2s;
-}
-.admin-btn:hover { opacity: 0.8; }
-
-/* ===== MAIN CONTENT ===== */
+/* ---- MAIN CONTENT ---- */
 #app {
-  padding-top: 52px;
-  min-height: 100vh;
+  padding-top: calc(var(--top-h) + var(--safe-top));
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
+  min-height: 100dvh;
 }
 
-/* ===== PLATFORM VIEWS ===== */
 .platform-view { display: none; }
 .platform-view.active { display: block; }
 
-/* ========================================
-   TWITTER PLATFORM
-   ======================================== */
-#twitter-view {
+/* ============================================================
+   TWITTER — X-style dark/cold/dense
+   ============================================================ */
+
+/* Twitter header */
+#tw-mobile-header {
+  background: rgba(0,0,0,0.85);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  justify-content: space-between;
+  gap: 12px;
+}
+[data-theme="light"] #tw-mobile-header {
+  background: rgba(255,255,255,0.9);
+}
+
+.tw-header-logo {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: var(--tw-accent);
+  flex-shrink: 0;
+}
+
+.tw-header-search {
+  flex: 1;
+  position: relative;
+}
+.tw-header-search input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 7px 14px 7px 32px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+.tw-header-search input:focus { border-color: var(--tw-accent); background: var(--bg2); }
+.tw-header-search .si {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); font-size: 13px; pointer-events: none;
+}
+
+.tw-theme-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; color: var(--text2);
+  transition: background 0.2s;
+}
+.tw-theme-btn:hover, .tw-theme-btn:active { background: var(--bg3); }
+
+/* Twitter member filter */
+#tw-view {
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* Twitter Header */
-.tw-header {
-  position: sticky;
-  top: 52px;
-  z-index: 100;
-  background: var(--bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-
-.tw-header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-}
-
-.tw-title { font-size: 20px; font-weight: 700; }
-
-.tw-search-bar {
-  padding: 8px 16px;
-  position: relative;
-}
-
-.tw-search-bar input {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 8px 16px 8px 36px;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
-.tw-search-bar input:focus { border-color: var(--accent); background: var(--bg); }
-.tw-search-bar .search-icon {
-  position: absolute;
-  left: 28px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text2);
-  font-size: 14px;
-}
-
-/* Twitter Member Filter */
-.tw-filter {
+.tw-member-strip {
   display: flex;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 14px;
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
 }
-.tw-filter::-webkit-scrollbar { display: none; }
 
-.member-chip {
+.tw-chip {
   flex-shrink: 0;
-  padding: 5px 12px;
+  padding: 5px 13px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
@@ -224,1334 +237,1057 @@ a { text-decoration: none; color: inherit; }
   transition: all 0.15s;
   white-space: nowrap;
 }
-.member-chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
+.tw-chip.active { background: var(--tw-accent); border-color: var(--tw-accent); color: #fff; font-weight: 600; }
 
-/* Twitter Tweet Card */
+/* Tweet card */
 .tweet-card {
   display: flex;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 11px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-  cursor: pointer;
   position: relative;
+  transition: background 0.12s;
+  cursor: pointer;
 }
-.tweet-card:hover { background: var(--hover); }
+.tweet-card:active { background: var(--hover); }
 
-.tweet-avatar {
+.tw-av {
   width: 40px; height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
+  border-radius: 50%; overflow: hidden; flex-shrink: 0;
   background: var(--bg3);
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text2);
+  font-size: 17px; font-weight: 700; color: var(--text2);
 }
-.tweet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.tw-av img { width: 100%; height: 100%; object-fit: cover; }
 
-.tweet-body { flex: 1; min-width: 0; }
+.tw-body { flex: 1; min-width: 0; }
 
-.tweet-meta {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-bottom: 3px;
+.tw-meta {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: 3px 5px; margin-bottom: 2px;
 }
-
-.tweet-name { font-size: 15px; font-weight: 700; color: var(--text); }
-.tweet-handle { font-size: 14px; color: var(--text2); }
-.tweet-dot { color: var(--text3); font-size: 14px; }
-.tweet-time { font-size: 14px; color: var(--text2); }
-
-.tweet-era {
-  font-size: 11px;
+.tw-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.tw-handle { font-size: 13px; color: var(--text2); }
+.tw-dot { font-size: 13px; color: var(--text3); }
+.tw-time { font-size: 13px; color: var(--text2); }
+.tw-era {
+  margin-left: auto;
+  font-size: 10px;
   background: var(--bg3);
   color: var(--text2);
   padding: 2px 7px;
   border-radius: 10px;
-  margin-left: auto;
 }
 
-.tweet-text {
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text);
-  word-break: break-word;
-  white-space: pre-wrap;
+.tw-text {
+  font-size: 15px; line-height: 1.5; color: var(--text);
+  white-space: pre-wrap; word-break: break-word;
   margin-bottom: 8px;
 }
 
-/* Tweet Images */
-.tweet-images {
-  margin-bottom: 10px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.tweet-imgs-1 img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 12px; cursor: pointer; }
-.tweet-imgs-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.tweet-imgs-2 img { width: 100%; height: 200px; object-fit: cover; cursor: pointer; }
-.tweet-imgs-3 { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
-.tweet-imgs-3 img:first-child { grid-row: 1/3; height: 280px; object-fit: cover; cursor: pointer; }
-.tweet-imgs-3 img { height: 140px; object-fit: cover; cursor: pointer; }
-.tweet-imgs-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.tweet-imgs-4 img { width: 100%; height: 150px; object-fit: cover; cursor: pointer; }
+/* Tweet images */
+.tw-imgs { border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+.tw-img-1 img { width: 100%; max-height: 320px; object-fit: cover; cursor: pointer; }
+.tw-img-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.tw-img-2 img { height: 180px; object-fit: cover; width: 100%; cursor: pointer; }
+.tw-img-3 { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
+.tw-img-3 img:first-child { grid-row: 1/3; height: 250px; object-fit: cover; cursor: pointer; }
+.tw-img-3 img { height: 125px; object-fit: cover; cursor: pointer; }
+.tw-img-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.tw-img-4 img { height: 130px; object-fit: cover; cursor: pointer; }
 
-.tweet-actions {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  margin-top: 4px;
+/* Tweet actions */
+.tw-actions {
+  display: flex; gap: 16px; align-items: center;
 }
-
-.tweet-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--text2);
-  font-size: 13px;
-  padding: 4px;
-  border-radius: 20px;
-  transition: all 0.15s;
+.tw-act-btn {
+  display: flex; align-items: center; gap: 4px;
+  color: var(--text3); font-size: 13px;
+  padding: 4px 0; transition: color 0.15s;
 }
-.tweet-action-btn:hover { color: var(--accent); }
-.tweet-action-btn.liked { color: #f91880; }
-.tweet-action-btn svg { width: 17px; height: 17px; }
+.tw-act-btn svg { width: 17px; height: 17px; }
+.tw-act-btn:active, .tw-act-btn:hover { color: var(--tw-accent); }
+.tw-act-btn.liked { color: #f91880; }
 
-.tweet-more-btn {
-  position: absolute;
-  top: 12px; right: 16px;
-  width: 28px; height: 28px;
-  border-radius: 50%;
+/* more btn */
+.post-more-btn {
+  position: absolute; top: 12px; right: 14px;
+  width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--text2);
-  font-size: 18px;
+  color: var(--text3); font-size: 18px; font-weight: 700;
   transition: all 0.15s;
+  letter-spacing: -1px;
 }
-.tweet-more-btn:hover { background: rgba(29,155,240,0.1); color: var(--accent); }
+.post-more-btn:active { background: var(--bg3); color: var(--text); }
 
-/* ========================================
-   WEVERSE PLATFORM
-   ======================================== */
-#weverse-view {
-  background: var(--bg);
-  min-height: 100vh;
-}
+/* ============================================================
+   WEVERSE — warm, rounded, community
+   ============================================================ */
 
-.wv-header {
-  position: sticky;
-  top: 52px;
-  z-index: 100;
-  background: var(--bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+#wv-mobile-header {
   border-bottom: 1px solid var(--border);
-}
-
-.wv-header-top {
-  display: flex;
-  align-items: center;
+  padding: 0 16px;
   justify-content: space-between;
-  padding: 14px 16px;
+  gap: 12px;
+  background: var(--bg);
 }
 
-.wv-title { 
-  font-size: 22px; 
-  font-weight: 800; 
-  background: linear-gradient(135deg, #9b59b6, #3498db);
+.wv-header-logo {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #b37fd4, #7eb8f7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  flex-shrink: 0;
 }
 
-.wv-search-bar {
-  padding: 0 16px 12px;
-  position: relative;
+.wv-header-search {
+  flex: 1; position: relative;
 }
-.wv-search-bar input {
+.wv-header-search input {
   width: 100%;
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 10px 16px 10px 40px;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
+  border-radius: 22px;
+  padding: 7px 14px 7px 32px;
+  font-size: 14px; color: var(--text); outline: none;
   transition: all 0.2s;
 }
-.wv-search-bar input:focus { border-color: #9b59b6; }
-.wv-search-bar .search-icon {
-  position: absolute;
-  left: 28px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text3);
-}
+.wv-header-search input:focus { border-color: var(--wv-accent); }
+.wv-header-search .si { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 13px; }
 
-/* Weverse Member Filter */
+/* Weverse member tabs */
 .wv-member-tabs {
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
+  display: flex; overflow-x: auto;
   border-bottom: 1px solid var(--border);
-  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
 }
-.wv-member-tabs::-webkit-scrollbar { display: none; }
-
-.wv-member-tab {
+.wv-m-tab {
   flex-shrink: 0;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 11px 16px;
+  font-size: 14px; font-weight: 600;
   color: var(--text3);
   border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-  white-space: nowrap;
+  white-space: nowrap; transition: all 0.2s;
 }
-.wv-member-tab.active { color: #9b59b6; border-bottom-color: #9b59b6; }
+.wv-m-tab.active { color: var(--wv-accent); border-bottom-color: var(--wv-accent); }
 
-/* Weverse Post Card */
-.wv-feed {
-  padding: 12px 16px;
-  max-width: 680px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* Weverse feed */
+#wv-view {
+  background: var(--bg2);
+  min-height: 100%;
 }
+.wv-feed { padding: 12px; max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
 
 .wv-card {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
-  transition: box-shadow 0.2s;
+  border: 1px solid var(--border);
 }
-.wv-card:hover { box-shadow: 0 4px 20px var(--shadow); }
 
-.wv-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px 10px;
+.wv-card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 14px 10px;
   position: relative;
 }
-
-.wv-avatar {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  overflow: hidden;
+.wv-av {
+  width: 42px; height: 42px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
   background: var(--bg3);
-  flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text2);
+  font-size: 18px; font-weight: 700; color: var(--text2);
 }
-.wv-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.wv-card-meta { flex: 1; }
-.wv-card-name { font-size: 15px; font-weight: 700; color: var(--text); }
-.wv-card-time { font-size: 12px; color: var(--text3); margin-top: 1px; }
-
-.wv-era-badge {
-  font-size: 11px;
-  background: linear-gradient(135deg, rgba(155,89,182,0.15), rgba(52,152,219,0.15));
-  color: #9b59b6;
-  border: 1px solid rgba(155,89,182,0.3);
-  padding: 3px 9px;
-  border-radius: 12px;
+.wv-av img { width: 100%; height: 100%; object-fit: cover; }
+.wv-meta { flex: 1; }
+.wv-name { font-size: 15px; font-weight: 700; }
+.wv-time { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.wv-era-tag {
+  font-size: 10px;
+  background: linear-gradient(135deg, rgba(179,127,212,0.15), rgba(126,184,247,0.15));
+  color: var(--wv-accent);
+  border: 1px solid rgba(179,127,212,0.25);
+  padding: 3px 9px; border-radius: 12px;
 }
-
-.wv-secret-badge {
-  font-size: 11px;
-  background: rgba(241,196,15,0.15);
-  color: #f39c12;
-  border: 1px solid rgba(241,196,15,0.3);
-  padding: 3px 9px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 3px;
+.wv-secret-tag {
+  font-size: 10px;
+  background: rgba(241,196,15,0.12);
+  color: #e6a817;
+  border: 1px solid rgba(241,196,15,0.25);
+  padding: 3px 9px; border-radius: 12px;
 }
 
-.wv-card-body { padding: 0 16px 12px; }
-
+.wv-card-body { padding: 0 14px 12px; }
 .wv-card-text {
-  font-size: 15px;
-  line-height: 1.65;
-  color: var(--text);
-  white-space: pre-wrap;
-  word-break: break-word;
+  font-size: 15px; line-height: 1.7; color: var(--text);
+  white-space: pre-wrap; word-break: break-word;
 }
 
-/* Secret post blur */
-.wv-secret-blur { 
-  filter: blur(6px); 
-  user-select: none; 
-  pointer-events: none;
-}
-
+/* secret */
+.wv-secret-wrap { position: relative; }
+.wv-secret-blur { filter: blur(7px); user-select: none; pointer-events: none; }
 .wv-secret-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  z-index: 2;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer;
 }
-
-.wv-secret-btn {
-  background: linear-gradient(135deg, #9b59b6, #3498db);
-  color: white;
+.wv-unlock-btn {
+  background: linear-gradient(135deg, #b37fd4, #7eb8f7);
+  color: #fff;
   border-radius: 20px;
   padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
 }
 
-/* Weverse Images */
-.wv-images {
-  margin: 8px 16px 12px;
-}
-.wv-img-grid-1 img { width: 100%; border-radius: 14px; max-height: 400px; object-fit: cover; cursor: pointer; }
-.wv-img-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.wv-img-grid-2 img { height: 180px; object-fit: cover; cursor: pointer; border-radius: 10px; }
-.wv-img-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
-.wv-img-grid-3 img { height: 120px; object-fit: cover; cursor: pointer; border-radius: 10px; }
-.wv-img-grid-n { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.wv-img-grid-n img { height: 120px; object-fit: cover; cursor: pointer; border-radius: 10px; position: relative; }
-.wv-img-more {
-  position: relative;
-}
-.wv-img-more-overlay {
-  position: absolute;
-  inset: 0;
+/* Weverse images */
+.wv-imgs { padding: 0 14px 12px; }
+.wv-img-1 img { width: 100%; border-radius: 14px; max-height: 380px; object-fit: cover; cursor: pointer; }
+.wv-img-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.wv-img-2 img { height: 160px; object-fit: cover; border-radius: 10px; cursor: pointer; }
+.wv-img-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.wv-img-3 img { height: 110px; object-fit: cover; border-radius: 10px; cursor: pointer; }
+.wv-img-n { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; }
+.wv-img-n img { height: 110px; object-fit: cover; border-radius: 10px; cursor: pointer; }
+.wv-img-more-wrap { position: relative; }
+.wv-img-more-label {
+  position: absolute; inset: 0;
   background: rgba(0,0,0,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 10px;
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 22px; font-weight: 700; cursor: pointer;
 }
 
-/* Weverse Card Footer */
-.wv-card-footer {
-  padding: 8px 16px 14px;
+/* Weverse footer */
+.wv-card-foot {
+  padding: 10px 14px 14px;
   border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
 }
-
-.wv-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.wv-actions { display: flex; align-items: center; gap: 14px; }
+.wv-act-btn {
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text2); font-size: 13px;
+  transition: color 0.15s;
 }
-
-.wv-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--text2);
-  font-size: 13px;
-  padding: 4px;
-  border-radius: 8px;
-  transition: all 0.15s;
-}
-.wv-action-btn:hover { color: #9b59b6; }
-.wv-action-btn.liked { color: #e74c3c; }
-.wv-action-btn svg { width: 18px; height: 18px; }
-
+.wv-act-btn svg { width: 19px; height: 19px; }
+.wv-act-btn:active, .wv-act-btn:hover { color: var(--wv-accent); }
+.wv-act-btn.liked { color: #e74c3c; }
 .wv-translate-btn {
-  font-size: 12px;
-  color: #9b59b6;
+  font-size: 12px; color: var(--wv-accent);
   padding: 5px 12px;
-  border: 1px solid rgba(155,89,182,0.4);
-  border-radius: 14px;
-  transition: all 0.2s;
-  align-self: flex-start;
-}
-.wv-translate-btn:hover { background: rgba(155,89,182,0.08); }
-
-.wv-translate-content {
-  display: none;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text2);
-  padding: 8px 12px;
-  background: var(--bg2);
-  border-radius: 10px;
-  border-left: 3px solid #9b59b6;
-}
-.wv-translate-content.show { display: block; }
-
-.wv-more-btn {
-  position: absolute;
-  top: 14px; right: 16px;
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text2);
-  font-size: 18px;
-  transition: all 0.15s;
-}
-.wv-more-btn:hover { background: var(--bg3); }
-
-/* ========================================
-   INSTAGRAM PLATFORM
-   ======================================== */
-#instagram-view {
-  background: var(--bg);
-  min-height: 100vh;
-}
-
-/* Instagram Header */
-.ig-header {
-  position: sticky;
-  top: 52px;
-  z-index: 100;
-  background: var(--bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 16px;
-}
-
-.ig-header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.ig-title {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  font-style: italic;
-}
-
-.ig-search-bar {
-  position: relative;
-  margin-bottom: 8px;
-}
-.ig-search-bar input {
-  width: 100%;
-  background: var(--bg3);
-  border: none;
-  border-radius: 10px;
-  padding: 8px 16px 8px 36px;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-}
-.ig-search-bar .search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text3);
-  font-size: 14px;
-}
-
-/* Instagram Stories */
-.ig-stories {
-  display: flex;
-  gap: 14px;
-  padding: 12px 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  border-bottom: 1px solid var(--border);
-}
-.ig-stories::-webkit-scrollbar { display: none; }
-
-.ig-story-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.ig-story-ring {
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  padding: 2px;
-  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  flex-shrink: 0;
-}
-.ig-story-ring.seen { background: var(--bg3); padding: 2px; }
-
-.ig-story-avatar {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--bg2);
-  border: 2px solid var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text2);
-}
-.ig-story-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.ig-story-name { font-size: 11px; color: var(--text); max-width: 64px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* Instagram Member Filter */
-.ig-member-filter {
-  display: flex;
-  gap: 6px;
-  padding: 8px 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.ig-member-filter::-webkit-scrollbar { display: none; }
-
-/* Instagram Feed */
-.ig-feed { max-width: 470px; margin: 0 auto; }
-
-.ig-post-card {
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0;
-}
-
-.ig-post-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  position: relative;
-}
-
-.ig-post-avatar {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  padding: 2px;
-  flex-shrink: 0;
-}
-.ig-post-avatar-inner {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--bg3);
-  border: 2px solid var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text2);
-}
-.ig-post-avatar-inner img { width: 100%; height: 100%; object-fit: cover; }
-
-.ig-post-meta { flex: 1; }
-.ig-post-name { font-size: 14px; font-weight: 600; color: var(--text); }
-.ig-post-sub { font-size: 12px; color: var(--text3); }
-
-.ig-more-btn {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text2);
-  font-size: 18px;
-  border-radius: 50%;
-}
-
-/* Instagram Carousel */
-.ig-carousel {
-  position: relative;
-  overflow: hidden;
-  background: #000;
-  aspect-ratio: 1/1;
-}
-
-.ig-carousel-track {
-  display: flex;
-  transition: transform 0.3s ease;
-  height: 100%;
-}
-
-.ig-carousel-slide {
-  flex-shrink: 0;
-  width: 100%;
-  height: 100%;
-}
-.ig-carousel-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  cursor: pointer;
-}
-
-.ig-carousel-dots {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-}
-.ig-carousel-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.5);
-  transition: all 0.2s;
-}
-.ig-carousel-dot.active { background: white; width: 16px; border-radius: 3px; }
-
-.ig-carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px; height: 28px;
-  background: rgba(255,255,255,0.85);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  color: #000;
-  z-index: 5;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
-.ig-carousel-btn.prev { left: 10px; }
-.ig-carousel-btn.next { right: 10px; }
-.ig-carousel-multi-icon {
-  position: absolute;
-  top: 10px; right: 10px;
-  background: rgba(0,0,0,0.6);
-  border-radius: 4px;
-  padding: 3px 5px;
-  color: white;
-  font-size: 11px;
-  z-index: 5;
-}
-
-/* Instagram Actions */
-.ig-post-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px 4px;
-}
-.ig-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--text);
-  font-size: 14px;
-  transition: all 0.15s;
-}
-.ig-action-btn svg { width: 24px; height: 24px; }
-.ig-action-btn:hover { opacity: 0.7; }
-.ig-action-btn.liked { color: #ed4956; }
-.ig-bookmark { margin-left: auto; }
-
-.ig-post-likes { padding: 0 14px 4px; font-size: 14px; font-weight: 600; color: var(--text); }
-.ig-post-caption {
-  padding: 0 14px 4px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text);
-}
-.ig-post-caption span.name { font-weight: 600; }
-.ig-post-date { padding: 0 14px 12px; font-size: 11px; color: var(--text3); text-transform: uppercase; }
-
-/* ===== LIGHTBOX ===== */
-#lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0,0,0,0.95);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-#lightbox.open { display: flex; }
-
-.lb-close {
-  position: absolute;
-  top: 16px; right: 16px;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  font-size: 22px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 10;
-}
-
-.lb-img-wrap {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-
-.lb-img-track {
-  display: flex;
-  height: 100%;
-  transition: transform 0.3s ease;
-}
-
-.lb-img-slide {
-  flex-shrink: 0;
-  width: 100vw;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-}
-.lb-img-slide img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.lb-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px; height: 44px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 50%;
-  color: white;
-  font-size: 20px;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 10;
-  backdrop-filter: blur(4px);
-}
-.lb-arrow.prev { left: 12px; }
-.lb-arrow.next { right: 12px; }
-.lb-arrow:hover { background: rgba(255,255,255,0.2); }
-
-.lb-counter {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255,255,255,0.7);
-  font-size: 13px;
-}
-
-/* ===== DROPDOWN MENU ===== */
-.dropdown-menu {
-  position: absolute;
-  right: 12px; top: 44px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  z-index: 200;
-  min-width: 140px;
-  box-shadow: 0 4px 20px var(--shadow);
-  display: none;
-}
-.dropdown-menu.open { display: block; }
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--text);
-  transition: background 0.15s;
-  cursor: pointer;
-}
-.dropdown-item:hover { background: var(--bg3); }
-.dropdown-item.danger { color: #e74c3c; }
-
-/* ===== PASSWORD MODAL ===== */
-.pw-modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  background: rgba(0,0,0,0.6);
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-}
-.pw-modal-overlay.open { display: flex; }
-.pw-modal {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 28px 24px;
-  width: 300px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-.pw-modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.pw-modal p { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
-.pw-modal input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg2);
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  margin-bottom: 12px;
-}
-.pw-modal-btns { display: flex; gap: 8px; }
-.pw-modal-btns button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.pw-cancel { background: var(--bg3); color: var(--text); }
-.pw-confirm { background: linear-gradient(135deg, #9b59b6, #3498db); color: white; }
-
-/* ===== STORY VIEWER ===== */
-#story-viewer {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 8000;
-  background: #000;
-}
-#story-viewer.open { display: flex; flex-direction: column; }
-.sv-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px;
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  z-index: 5;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-}
-.sv-progress {
-  flex: 1;
-  height: 2px;
-  background: rgba(255,255,255,0.4);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.sv-progress-bar {
-  height: 100%;
-  background: white;
-  width: 0%;
-  transition: width 0.1s linear;
-}
-.sv-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; overflow: hidden; }
-.sv-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.sv-name { font-size: 14px; font-weight: 600; color: white; }
-.sv-time { font-size: 12px; color: rgba(255,255,255,0.7); }
-.sv-close { margin-left: auto; color: white; font-size: 22px; }
-.sv-content { flex: 1; display: flex; align-items: center; justify-content: center; }
-.sv-content img { max-width: 100%; max-height: 100vh; object-fit: contain; }
-.sv-nav { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; }
-.sv-nav-area { flex: 1; }
-
-/* ===== ADMIN PANEL ===== */
-#admin-view {
-  display: none;
-  min-height: 100vh;
-  background: var(--bg);
-}
-#admin-view.active { display: block; }
-
-.admin-header {
-  position: sticky;
-  top: 52px;
-  z-index: 100;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.admin-header h2 { font-size: 18px; font-weight: 700; flex: 1; }
-.admin-back-btn {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text);
-  font-size: 20px;
-  transition: background 0.15s;
-}
-.admin-back-btn:hover { background: var(--bg3); }
-
-.admin-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.admin-tabs::-webkit-scrollbar { display: none; }
-.admin-tab {
-  flex-shrink: 0;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text2);
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-}
-.admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-.admin-content { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
-
-.admin-section { margin-bottom: 20px; }
-.admin-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text2);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.admin-input {
-  width: 100%;
-  padding: 11px 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.admin-input:focus { border-color: var(--accent); }
-.admin-textarea {
-  width: 100%;
-  padding: 11px 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  resize: vertical;
-  min-height: 100px;
-  transition: border-color 0.2s;
-}
-.admin-textarea:focus { border-color: var(--accent); }
-.admin-select {
-  width: 100%;
-  padding: 11px 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  appearance: none;
-  cursor: pointer;
-}
-
-.member-select-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-.member-select-chip {
-  padding: 8px 4px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text2);
-  text-align: center;
-  transition: all 0.15s;
-  cursor: pointer;
-}
-.member-select-chip.selected { background: var(--accent); border-color: var(--accent); color: white; }
-
-.image-upload-area {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-}
-.image-upload-area:hover { border-color: var(--accent); background: rgba(29,155,240,0.03); }
-.image-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.upload-icon { font-size: 28px; margin-bottom: 6px; }
-.upload-text { font-size: 14px; color: var(--text2); }
-.upload-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
-
-.img-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
-}
-.img-preview-item {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg3);
-}
-.img-preview-item img { width: 100%; height: 100%; object-fit: cover; }
-.img-preview-remove {
-  position: absolute;
-  top: 4px; right: 4px;
-  width: 20px; height: 20px;
-  background: rgba(0,0,0,0.6);
-  border-radius: 50%;
-  color: white;
-  font-size: 12px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
-
-.toggle-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-.toggle-label { font-size: 15px; color: var(--text); font-weight: 500; }
-.toggle {
-  width: 44px; height: 24px;
-  background: var(--bg3);
-  border-radius: 12px;
-  position: relative;
-  cursor: pointer;
+  border: 1px solid rgba(179,127,212,0.35);
+  border-radius: 14px; align-self: flex-start;
   transition: background 0.2s;
 }
-.toggle.on { background: #9b59b6; }
-.toggle-knob {
-  position: absolute;
-  top: 2px; left: 2px;
-  width: 20px; height: 20px;
+.wv-translate-btn:active { background: rgba(179,127,212,0.1); }
+.wv-translate-box {
+  display: none;
+  font-size: 13px; line-height: 1.6;
+  color: var(--text2);
+  padding: 10px 12px;
+  background: var(--bg2);
+  border-radius: 10px;
+  border-left: 3px solid var(--wv-accent);
+}
+.wv-translate-box.show { display: block; }
+
+/* ============================================================
+   INSTAGRAM — pure image, white/minimal
+   ============================================================ */
+
+#ig-mobile-header {
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  justify-content: space-between;
+  background: var(--bg);
+}
+
+.ig-header-logo {
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -1.5px; font-style: italic;
+  color: var(--text);
+}
+
+.ig-header-actions { display: flex; align-items: center; gap: 6px; }
+.ig-header-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); font-size: 20px; font-weight: 300;
+  transition: background 0.15s;
+}
+.ig-header-btn:active { background: var(--bg3); }
+
+/* Instagram search bar (below header, sticky) */
+.ig-search-sticky {
+  position: sticky;
+  top: calc(var(--top-h) + var(--safe-top));
+  z-index: 90;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 14px;
+}
+.ig-search-wrap {
+  position: relative;
+}
+.ig-search-wrap input {
+  width: 100%;
+  background: var(--bg3);
+  border: none; border-radius: 10px;
+  padding: 8px 14px 8px 34px;
+  font-size: 14px; color: var(--text); outline: none;
+}
+.ig-search-wrap .si { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+
+/* Instagram stories */
+.ig-stories-row {
+  display: flex; gap: 14px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.ig-story-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px;
+  flex-shrink: 0; cursor: pointer;
+}
+.ig-story-ring {
+  width: 62px; height: 62px; border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+.ig-story-inner {
+  width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+  background: var(--bg2);
+  border: 2.5px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; color: var(--text2);
+}
+.ig-story-inner img { width: 100%; height: 100%; object-fit: cover; }
+.ig-story-name { font-size: 11px; color: var(--text); max-width: 64px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Instagram member filter */
+.ig-member-strip {
+  display: flex; gap: 7px;
+  padding: 9px 14px;
+  overflow-x: auto;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Instagram feed */
+#ig-view { background: var(--bg); }
+.ig-feed { max-width: 470px; margin: 0 auto; }
+
+/* Post card */
+.ig-card { border-bottom: 1px solid var(--border); }
+
+.ig-card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; position: relative;
+}
+.ig-card-av {
+  width: 36px; height: 36px;
+  border-radius: 50%; padding: 2px; flex-shrink: 0;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+.ig-card-av-inner {
+  width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+  background: var(--bg3);
+  border: 2px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: var(--text2);
+}
+.ig-card-av-inner img { width: 100%; height: 100%; object-fit: cover; }
+.ig-card-name { font-size: 14px; font-weight: 600; }
+.ig-card-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+/* Carousel */
+.ig-carousel {
+  position: relative;
+  background: #000;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+}
+.ig-carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.ig-carousel-slide { flex-shrink: 0; width: 100%; height: 100%; }
+.ig-carousel-slide img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+
+.ig-carousel-dots {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 4px;
+}
+.ig-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.45); transition: all 0.2s; }
+.ig-dot.active { background: white; width: 16px; border-radius: 3px; }
+
+.ig-carr-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.88);
   border-radius: 50%;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: #111; z-index: 5;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+.ig-carr-btn.prev { left: 8px; }
+.ig-carr-btn.next { right: 8px; }
+.ig-multi-icon {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.55); border-radius: 4px;
+  padding: 3px 5px; color: #fff; font-size: 11px; z-index: 5;
+}
+
+/* Instagram actions */
+.ig-actions {
+  display: flex; align-items: center;
+  padding: 9px 14px 4px;
+  gap: 14px;
+}
+.ig-act-btn {
+  display: flex; align-items: center;
+  color: var(--text); transition: opacity 0.15s;
+}
+.ig-act-btn svg { width: 24px; height: 24px; }
+.ig-act-btn:active { opacity: 0.6; }
+.ig-act-btn.liked { color: #ed4956; }
+.ig-bookmark { margin-left: auto; }
+
+.ig-likes { padding: 0 14px 3px; font-size: 14px; font-weight: 600; }
+.ig-caption { padding: 0 14px 4px; font-size: 14px; line-height: 1.5; }
+.ig-caption .n { font-weight: 600; }
+.ig-date { padding: 0 14px 12px; font-size: 11px; color: var(--text3); letter-spacing: 0.4px; }
+
+/* ============================================================
+   ADMIN VIEW
+   ============================================================ */
+#admin-view { display: none; min-height: 100dvh; background: var(--bg); }
+#admin-view.active { display: block; }
+
+.admin-mobile-header {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: calc(52px + var(--safe-top));
+  padding-top: var(--safe-top);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding-left: 14px; padding-right: 14px;
+  gap: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.admin-back { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 22px; }
+.admin-back:active { background: var(--bg3); }
+.admin-title { font-size: 18px; font-weight: 700; flex: 1; }
+
+#admin-view .admin-body {
+  padding-top: calc(52px + var(--safe-top));
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.admin-tab-bar {
+  display: flex; border-bottom: 1px solid var(--border);
+  overflow-x: auto; background: var(--bg);
+  position: sticky;
+  top: calc(52px + var(--safe-top));
+  z-index: 90;
+}
+.a-tab {
+  flex-shrink: 0;
+  padding: 13px 20px;
+  font-size: 14px; font-weight: 600;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: all 0.2s;
+}
+.a-tab.active { color: var(--tw-accent); border-bottom-color: var(--tw-accent); }
+
+.admin-pane { padding: 20px 16px; max-width: 560px; margin: 0 auto; display: none; }
+.admin-pane.active { display: block; }
+
+.a-label {
+  display: block;
+  font-size: 12px; font-weight: 700;
+  color: var(--text3);
+  margin-bottom: 7px;
+  text-transform: uppercase; letter-spacing: 0.6px;
+}
+.a-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.a-input:focus { border-color: var(--tw-accent); }
+.a-textarea {
+  width: 100%; min-height: 100px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-size: 15px; outline: none;
+  resize: vertical; transition: border-color 0.2s;
+}
+.a-textarea:focus { border-color: var(--tw-accent); }
+.a-select {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-size: 15px; outline: none;
+}
+
+.a-section { margin-bottom: 20px; }
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.m-chip {
+  padding: 9px 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 12px; font-weight: 500;
+  color: var(--text2); text-align: center;
+  cursor: pointer; transition: all 0.15s;
+  background: var(--bg2);
+}
+.m-chip.on { background: var(--tw-accent); border-color: var(--tw-accent); color: #fff; font-weight: 700; }
+
+.img-drop {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 22px; text-align: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.img-drop:active { border-color: var(--tw-accent); background: rgba(29,155,240,0.04); }
+.img-drop-icon { font-size: 28px; margin-bottom: 6px; }
+.img-drop-text { font-size: 14px; color: var(--text2); }
+.img-drop-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+.img-previews {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+  margin-top: 10px;
+}
+.img-prev {
+  position: relative; aspect-ratio: 1;
+  border-radius: 10px; overflow: hidden; background: var(--bg3);
+}
+.img-prev img { width: 100%; height: 100%; object-fit: cover; }
+.img-prev-x {
+  position: absolute; top: 4px; right: 4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,0.65); color: #fff;
+  font-size: 12px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.toggle-label-text { font-size: 15px; font-weight: 500; }
+.tog {
+  width: 46px; height: 26px;
+  background: var(--bg3); border-radius: 13px;
+  position: relative; cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.tog.on { background: var(--wv-accent); }
+.tog-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   transition: transform 0.2s;
 }
-.toggle.on .toggle-knob { transform: translateX(20px); }
+.tog.on .tog-knob { transform: translateX(20px); }
 
-.admin-submit-btn {
-  width: 100%;
-  padding: 14px;
-  background: var(--accent);
-  color: white;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  transition: opacity 0.2s;
-  margin-top: 8px;
+.a-submit-btn {
+  width: 100%; padding: 15px;
+  background: var(--tw-accent);
+  color: #fff; border-radius: 14px;
+  font-size: 16px; font-weight: 700;
+  transition: opacity 0.2s; margin-top: 8px;
 }
-.admin-submit-btn:hover { opacity: 0.85; }
-.admin-submit-btn:disabled { opacity: 0.5; }
+.a-submit-btn:active { opacity: 0.75; }
+.a-submit-btn:disabled { opacity: 0.45; }
 
-/* Member profile cards */
-.member-profile-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.member-profile-card {
+/* member profile cards */
+.prof-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.prof-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
+  border-radius: 18px;
+  padding: 16px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  cursor: pointer; transition: box-shadow 0.2s;
 }
-.member-profile-card:hover { box-shadow: 0 4px 16px var(--shadow); }
-.member-profile-card-avatar {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  overflow: hidden;
+.prof-card:active { box-shadow: 0 4px 20px var(--shadow); }
+.prof-card-av {
+  width: 56px; height: 56px; border-radius: 50%; overflow: hidden;
   background: var(--bg3);
   display: flex; align-items: center; justify-content: center;
   font-size: 22px;
-  font-weight: 700;
-  color: var(--text2);
 }
-.member-profile-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.member-profile-card-name { font-size: 14px; font-weight: 700; color: var(--text); text-align: center; }
-.member-profile-card-handle { font-size: 12px; color: var(--text2); }
+.prof-card-av img { width: 100%; height: 100%; object-fit: cover; }
+.prof-card-name { font-size: 14px; font-weight: 700; text-align: center; }
+.prof-card-handle { font-size: 12px; color: var(--text2); }
+
+/* ============================================================
+   SHARED UI
+   ============================================================ */
+
+/* Dropdown */
+.dropdown {
+  position: absolute; right: 10px; top: 42px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  z-index: 500; min-width: 140px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  display: none;
+}
+.dropdown.open { display: block; }
+.dd-item {
+  padding: 13px 16px;
+  font-size: 14px; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; transition: background 0.12s;
+}
+.dd-item:active { background: var(--bg3); }
+.dd-item.red { color: #e74c3c; }
+
+/* Lightbox */
+#lightbox {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.97);
+  flex-direction: column; align-items: center; justify-content: center;
+}
+#lightbox.open { display: flex; }
+.lb-close {
+  position: absolute; top: max(16px, var(--safe-top)); right: 16px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); color: #fff;
+  font-size: 20px; display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.lb-track-wrap { width: 100vw; height: 100%; overflow: hidden; position: relative; }
+.lb-track {
+  display: flex; height: 100%;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.lb-slide {
+  flex-shrink: 0; width: 100vw; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px 12px 40px;
+}
+.lb-slide img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; }
+.lb-arr {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.1); border-radius: 50%;
+  color: #fff; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px); z-index: 10;
+}
+.lb-arr.prev { left: 10px; }
+.lb-arr.next { right: 10px; }
+.lb-counter {
+  position: absolute; bottom: max(20px, var(--safe-bottom));
+  left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.6); font-size: 13px;
+}
+
+/* PW Modal */
+.pw-overlay {
+  display: none; position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,0.6);
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(5px);
+}
+.pw-overlay.open { display: flex; }
+.pw-box {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 28px 22px;
+  width: min(320px, 92vw);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+.pw-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+.pw-box p { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
+.pw-box input {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px; background: var(--bg2);
+  color: var(--text); font-size: 15px; outline: none;
+  margin-bottom: 12px;
+}
+.pw-btns { display: flex; gap: 8px; }
+.pw-btns button { flex: 1; padding: 11px; border-radius: 12px; font-size: 14px; font-weight: 700; }
+.pw-cancel { background: var(--bg3); color: var(--text); }
+.pw-confirm { background: linear-gradient(135deg, #b37fd4, #7eb8f7); color: #fff; }
+
+/* Story viewer */
+#sv {
+  display: none; position: fixed; inset: 0; z-index: 8500;
+  background: #000;
+}
+#sv.open { display: block; }
+.sv-bg { width: 100%; height: 100%; object-fit: contain; }
+.sv-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+}
+.sv-top {
+  padding: max(16px, calc(var(--safe-top) + 8px)) 16px 0;
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+}
+.sv-prog { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+.sv-bar { height: 100%; background: #fff; width: 0%; transition: width 0.1s linear; }
+.sv-user { display: flex; align-items: center; gap: 8px; padding: 10px 0 0; }
+.sv-uav { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; }
+.sv-uav img { width: 100%; height: 100%; object-fit: cover; }
+.sv-uname { font-size: 13px; font-weight: 600; color: #fff; }
+.sv-utime { font-size: 11px; color: rgba(255,255,255,0.65); }
+.sv-x { margin-left: auto; color: #fff; font-size: 22px; padding: 4px; }
+.sv-taps { position: absolute; inset: 0; display: flex; }
+.sv-tap { flex: 1; }
 
 /* Edit member modal */
-.edit-modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 6000;
+.edit-overlay {
+  display: none; position: fixed; inset: 0; z-index: 7000;
   background: rgba(0,0,0,0.5);
-  align-items: flex-end;
-  justify-content: center;
-  backdrop-filter: blur(4px);
+  align-items: flex-end; justify-content: center;
+  backdrop-filter: blur(5px);
 }
-.edit-modal-overlay.open { display: flex; }
-.edit-modal {
+.edit-overlay.open { display: flex; }
+.edit-sheet {
   background: var(--card);
   border-radius: 24px 24px 0 0;
-  padding: 24px 20px;
-  width: 100%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
+  padding: 22px 18px;
+  width: 100%; max-width: 500px;
+  max-height: 88dvh; overflow-y: auto;
+  padding-bottom: calc(22px + var(--safe-bottom));
 }
-.edit-modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.edit-sheet h3 { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
 
 /* Toast */
 #toast {
   position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text);
-  color: var(--bg);
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.3s;
-  z-index: 9000;
-  white-space: nowrap;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
+  left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--text); color: var(--bg);
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 14px; font-weight: 500;
+  opacity: 0; transition: all 0.25s;
+  z-index: 9500; white-space: nowrap;
+  max-width: 90vw;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Loading */
-.loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  color: var(--text2);
-  font-size: 14px;
-}
-.spinner {
-  width: 20px; height: 20px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-right: 10px;
-}
+/* Loading / empty */
+.load-wrap { display: flex; align-items: center; justify-content: center; padding: 48px 20px; color: var(--text2); font-size: 14px; }
+.spin { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--tw-accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 10px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 56px 20px; color: var(--text2); }
+.empty .ei { font-size: 42px; margin-bottom: 12px; }
+.empty p { font-size: 15px; }
 
-/* Empty state */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text2);
-}
-.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state p { font-size: 15px; }
-
-/* PC layout */
+/* ============================================================
+   DESKTOP OVERRIDES (≥768px)
+   ============================================================ */
 @media (min-width: 768px) {
-  #twitter-view { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-  .admin-content { padding: 20px 24px; }
-  .member-select-grid { grid-template-columns: repeat(4, 1fr); }
-  .ig-feed { max-width: 470px; }
+  /* Show top nav, hide bottom nav */
+  #bottom-nav { display: none; }
+  #platform-tabs-desktop { display: flex; }
+
+  /* Reset padding */
+  #app { padding-top: calc(52px + var(--safe-top)); padding-bottom: 0; }
+
+  /* Top desktop nav */
+  #platform-tabs-desktop {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+    height: calc(52px + var(--safe-top));
+    padding-top: var(--safe-top);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    padding-left: 24px; padding-right: 24px;
+    gap: 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .dt-logo { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+  .dt-tabs { display: flex; gap: 2px; background: var(--bg3); border-radius: 20px; padding: 3px; }
+  .dt-tab {
+    padding: 5px 18px; border-radius: 17px;
+    font-size: 13px; font-weight: 600;
+    color: var(--text2); transition: all 0.2s;
+  }
+  .dt-tab.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 4px var(--shadow); }
+  .dt-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .dt-theme-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; color: var(--text2); transition: background 0.2s;
+  }
+  .dt-theme-btn:hover { background: var(--bg3); }
+  .dt-admin-btn {
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 700;
+    background: var(--text); color: var(--bg);
+    transition: opacity 0.2s;
+  }
+  .dt-admin-btn:hover { opacity: 0.8; }
+
+  /* Platform headers become sticky sub-headers */
+  .mobile-header { top: calc(52px + var(--safe-top)); position: sticky; }
+  .ig-search-sticky { top: calc(104px + var(--safe-top)); }
+
+  /* Center columns on desktop */
+  #tw-view { max-width: 600px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
   .wv-feed { max-width: 680px; }
+  .ig-feed { max-width: 470px; }
+
+  /* admin */
+  .admin-mobile-header { top: 0; }
+  #admin-view .admin-body { padding-top: 52px; }
+  .admin-tab-bar { top: 52px; }
+  #toast { bottom: 24px; }
 }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 0; height: 0; }
-
-/* Utility */
-.hidden { display: none !important; }
 </style>
 </head>
 <body data-theme="dark">
 
-<!-- ===== TOAST ===== -->
-<div id="toast"></div>
-
-<!-- ===== PLATFORM TABS ===== -->
-<div id="platform-tabs">
-  <div class="tab-logo">CLOW</div>
-  <div class="tab-btns">
-    <button class="tab-btn active" onclick="switchPlatform('twitter')">Twitter</button>
-    <button class="tab-btn" onclick="switchPlatform('weverse')">Weverse</button>
-    <button class="tab-btn" onclick="switchPlatform('instagram')">Instagram</button>
+<!-- ===== DESKTOP TOP NAV ===== -->
+<div id="platform-tabs-desktop">
+  <div class="dt-logo">CLOW</div>
+  <div class="dt-tabs">
+    <button class="dt-tab active" onclick="switchPlatform('twitter')">Twitter</button>
+    <button class="dt-tab" onclick="switchPlatform('weverse')">Weverse</button>
+    <button class="dt-tab" onclick="switchPlatform('instagram')">Instagram</button>
   </div>
-  <div class="tab-actions">
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-icon">🌙</button>
-    <button class="admin-btn" onclick="openAdmin()">관리자</button>
+  <div class="dt-actions">
+    <button class="dt-theme-btn" onclick="toggleTheme()" id="dt-theme-icon">☀️</button>
+    <button class="dt-admin-btn" onclick="openAdmin()">관리자</button>
   </div>
 </div>
+
+<!-- ===== BOTTOM NAV (mobile only) ===== -->
+<nav id="bottom-nav">
+  <div class="bn-item active" id="bn-twitter" onclick="switchPlatform('twitter')">
+    <div class="bn-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </div>
+    <span>Twitter</span>
+  </div>
+  <div class="bn-item" id="bn-weverse" onclick="switchPlatform('weverse')">
+    <div class="bn-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    </div>
+    <span>Weverse</span>
+  </div>
+  <div class="bn-item" id="bn-instagram" onclick="switchPlatform('instagram')">
+    <div class="bn-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+    </div>
+    <span>Instagram</span>
+  </div>
+  <div class="bn-item" id="bn-admin" onclick="openAdmin()">
+    <div class="bn-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <span>관리자</span>
+  </div>
+</nav>
 
 <!-- ===== APP ===== -->
 <div id="app">
 
-  <!-- ===== TWITTER VIEW ===== -->
+  <!-- ============================
+       TWITTER VIEW
+       ============================ -->
   <div id="twitter-view" class="platform-view active">
-    <div class="tw-header">
-      <div class="tw-header-top">
-        <div class="tw-title">홈</div>
-      </div>
-      <div class="tw-search-bar">
-        <span class="search-icon">🔍</span>
+
+    <div class="mobile-header" id="tw-mobile-header">
+      <div class="tw-header-logo">𝕏</div>
+      <div class="tw-header-search">
+        <span class="si">🔍</span>
         <input type="text" placeholder="트윗, 멤버, 해시태그 검색" id="tw-search" oninput="renderTwitter()">
       </div>
-      <div class="tw-filter" id="tw-member-filter">
-        <button class="member-chip active" data-member="all" onclick="toggleTwFilter('all',this)">전체</button>
-      </div>
+      <button class="tw-theme-btn" onclick="toggleTheme()" id="tw-theme-icon">☀️</button>
     </div>
+
+    <div class="tw-member-strip" id="tw-chips">
+      <button class="tw-chip active" data-m="all" onclick="twFilter('all',this)">전체</button>
+    </div>
+
     <div id="tw-feed">
-      <div class="loading-spinner"><div class="spinner"></div>불러오는 중...</div>
+      <div class="load-wrap"><div class="spin"></div>불러오는 중...</div>
     </div>
   </div>
 
-  <!-- ===== WEVERSE VIEW ===== -->
+  <!-- ============================
+       WEVERSE VIEW
+       ============================ -->
   <div id="weverse-view" class="platform-view">
-    <div class="wv-header">
-      <div class="wv-header-top">
-        <div class="wv-title">Weverse</div>
-      </div>
-      <div class="wv-search-bar">
-        <span class="search-icon">🔍</span>
+
+    <div class="mobile-header" id="wv-mobile-header">
+      <div class="wv-header-logo">Weverse</div>
+      <div class="wv-header-search">
+        <span class="si">🔍</span>
         <input type="text" placeholder="게시글, 멤버, 해시태그 검색" id="wv-search" oninput="renderWeverse()">
       </div>
-      <div class="wv-member-tabs" id="wv-member-tabs">
-        <button class="wv-member-tab active" data-member="all" onclick="toggleWvFilter('all',this)">전체</button>
-      </div>
+      <button class="tw-theme-btn" onclick="toggleTheme()">☀️</button>
     </div>
-    <div class="wv-feed" id="wv-feed">
-      <div class="loading-spinner"><div class="spinner"></div>불러오는 중...</div>
+
+    <div class="wv-member-tabs" id="wv-tabs">
+      <button class="wv-m-tab active" data-m="all" onclick="wvFilter('all',this)">전체</button>
+    </div>
+
+    <div id="wv-view">
+      <div class="wv-feed" id="wv-feed">
+        <div class="load-wrap"><div class="spin"></div>불러오는 중...</div>
+      </div>
     </div>
   </div>
 
-  <!-- ===== INSTAGRAM VIEW ===== -->
+  <!-- ============================
+       INSTAGRAM VIEW
+       ============================ -->
   <div id="instagram-view" class="platform-view">
-    <div class="ig-header">
-      <div class="ig-header-top">
-        <div class="ig-title">CLOW</div>
+
+    <div class="mobile-header" id="ig-mobile-header">
+      <div class="ig-header-logo">CLOW</div>
+      <div class="ig-header-actions">
+        <button class="ig-header-btn" onclick="toggleTheme()" id="ig-theme-icon">☀️</button>
       </div>
-      <div class="ig-search-bar">
-        <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="ig-search-sticky">
+      <div class="ig-search-wrap">
+        <span class="si">🔍</span>
         <input type="text" placeholder="검색" id="ig-search" oninput="renderInstagram()">
       </div>
     </div>
-    <div class="ig-stories" id="ig-stories-bar"></div>
-    <div class="ig-member-filter" id="ig-member-filter">
-      <button class="member-chip active" data-member="all" onclick="toggleIgFilter('all',this)">전체</button>
+
+    <div class="ig-stories-row" id="ig-stories-row"></div>
+
+    <div class="ig-member-strip" id="ig-chips">
+      <button class="tw-chip active" data-m="all" onclick="igFilter('all',this)">전체</button>
     </div>
+
     <div class="ig-feed" id="ig-feed">
-      <div class="loading-spinner"><div class="spinner"></div>불러오는 중...</div>
+      <div class="load-wrap"><div class="spin"></div>불러오는 중...</div>
     </div>
   </div>
 
-  <!-- ===== ADMIN VIEW ===== -->
+  <!-- ============================
+       ADMIN VIEW
+       ============================ -->
   <div id="admin-view">
-    <div class="admin-header">
-      <button class="admin-back-btn" onclick="closeAdmin()">←</button>
-      <h2>관리자 패널</h2>
+    <div class="admin-mobile-header">
+      <button class="admin-back" onclick="closeAdmin()">←</button>
+      <div class="admin-title">관리자 패널</div>
     </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchAdminTab('post',this)">게시글 작성</button>
-      <button class="admin-tab" onclick="switchAdminTab('story',this)">스토리 업로드</button>
-      <button class="admin-tab" onclick="switchAdminTab('profiles',this)">멤버 프로필</button>
-    </div>
+    <div class="admin-body">
+      <div class="admin-tab-bar">
+        <button class="a-tab active" onclick="switchAdminTab('post',this)">게시글 작성</button>
+        <button class="a-tab" onclick="switchAdminTab('story',this)">스토리</button>
+        <button class="a-tab" onclick="switchAdminTab('profiles',this)">멤버 프로필</button>
+      </div>
 
-    <!-- Admin: Post -->
-    <div class="admin-content" id="admin-post-tab">
-      <div class="admin-section">
-        <label class="admin-label">플랫폼</label>
-        <select class="admin-select" id="admin-platform" onchange="onAdminPlatformChange()">
-          <option value="twitter">Twitter</option>
-          <option value="weverse">Weverse</option>
-          <option value="instagram">Instagram</option>
-        </select>
-      </div>
-      <div class="admin-section">
-        <label class="admin-label">멤버</label>
-        <div class="member-select-grid" id="admin-member-grid"></div>
-      </div>
-      <div class="admin-section">
-        <label class="admin-label">ERA 태그</label>
-        <input class="admin-input" type="text" id="admin-era" placeholder="예: CLAP, LOVE DIVE, After LIKE">
-      </div>
-      <div class="admin-section">
-        <label class="admin-label">게시 날짜</label>
-        <input class="admin-input" type="datetime-local" id="admin-date">
-      </div>
-      <div class="admin-section">
-        <label class="admin-label">내용</label>
-        <textarea class="admin-textarea" id="admin-content" placeholder="게시글 내용을 입력하세요"></textarea>
-      </div>
-      <div class="admin-section" id="admin-secret-section" style="display:none;">
-        <div class="toggle-wrap">
-          <span class="toggle-label">🔒 비밀포스트</span>
-          <div class="toggle" id="secret-toggle" onclick="toggleSecret()"><div class="toggle-knob"></div></div>
+      <!-- Post pane -->
+      <div class="admin-pane active" id="pane-post">
+        <div class="a-section">
+          <label class="a-label">플랫폼</label>
+          <select class="a-select" id="a-platform" onchange="onPlatformChange()">
+            <option value="twitter">Twitter</option>
+            <option value="weverse">Weverse</option>
+            <option value="instagram">Instagram</option>
+          </select>
         </div>
-        <div id="secret-pw-section" style="display:none; margin-top:8px;">
-          <input class="admin-input" type="password" id="admin-secret-pw" placeholder="비밀번호 입력">
+        <div class="a-section">
+          <label class="a-label">멤버</label>
+          <div class="member-grid" id="a-member-grid"></div>
         </div>
-      </div>
-      <div class="admin-section" id="admin-image-section">
-        <label class="admin-label">이미지 첨부 <span id="img-limit-text" style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)"></span></label>
-        <div class="image-upload-area" onclick="document.getElementById('admin-img-input').click()">
-          <div class="upload-icon">📷</div>
-          <div class="upload-text">이미지를 선택하세요</div>
-          <div class="upload-sub" id="upload-sub-text"></div>
-          <input type="file" id="admin-img-input" accept="image/*" multiple style="display:none;" onchange="handleImageSelect(event)">
+        <div class="a-section">
+          <label class="a-label">ERA 태그</label>
+          <input class="a-input" type="text" id="a-era" placeholder="예: CLAP, LOVE DIVE, After LIKE">
         </div>
-        <div class="img-preview-grid" id="img-preview-grid"></div>
+        <div class="a-section">
+          <label class="a-label">게시 날짜</label>
+          <input class="a-input" type="datetime-local" id="a-date">
+        </div>
+        <div class="a-section">
+          <label class="a-label">내용</label>
+          <textarea class="a-textarea" id="a-content" placeholder="내용을 입력하세요"></textarea>
+        </div>
+        <div class="a-section" id="a-secret-row" style="display:none;">
+          <div class="toggle-row">
+            <span class="toggle-label-text">🔒 비밀포스트</span>
+            <div class="tog" id="a-secret-tog" onclick="toggleSecret()"><div class="tog-knob"></div></div>
+          </div>
+          <div id="a-pw-row" style="display:none;margin-top:8px;">
+            <input class="a-input" type="password" id="a-pw" placeholder="비밀번호">
+          </div>
+        </div>
+        <div class="a-section">
+          <label class="a-label">이미지 <span id="a-img-hint" style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3);"></span></label>
+          <div class="img-drop" onclick="document.getElementById('a-img-input').click()">
+            <div class="img-drop-icon">📷</div>
+            <div class="img-drop-text">이미지 선택</div>
+            <div class="img-drop-sub" id="a-img-sub"></div>
+          </div>
+          <input type="file" id="a-img-input" accept="image/*" multiple style="display:none;" onchange="handleImgs(event)">
+          <div class="img-previews" id="a-img-previews"></div>
+        </div>
+        <button class="a-submit-btn" id="a-submit" onclick="submitPost()">게시하기</button>
       </div>
-      <button class="admin-submit-btn" id="admin-submit-btn" onclick="submitPost()">게시하기</button>
-    </div>
 
-    <!-- Admin: Story -->
-    <div class="admin-content hidden" id="admin-story-tab">
-      <div class="admin-section">
-        <label class="admin-label">멤버</label>
-        <div class="member-select-grid" id="admin-story-member-grid"></div>
-      </div>
-      <div class="admin-section">
-        <label class="admin-label">스토리 이미지</label>
-        <div class="image-upload-area" onclick="document.getElementById('admin-story-img').click()">
-          <div class="upload-icon">📸</div>
-          <div class="upload-text">스토리 이미지 선택</div>
-          <div class="upload-sub">세로 비율 권장 (9:16)</div>
-          <input type="file" id="admin-story-img" accept="image/*" style="display:none;" onchange="handleStoryImageSelect(event)">
+      <!-- Story pane -->
+      <div class="admin-pane" id="pane-story">
+        <div class="a-section">
+          <label class="a-label">멤버</label>
+          <div class="member-grid" id="a-story-grid"></div>
         </div>
-        <div id="story-img-preview" style="margin-top:10px;"></div>
+        <div class="a-section">
+          <label class="a-label">스토리 이미지</label>
+          <div class="img-drop" onclick="document.getElementById('a-story-img').click()">
+            <div class="img-drop-icon">📸</div>
+            <div class="img-drop-text">이미지 선택 (세로 권장)</div>
+          </div>
+          <input type="file" id="a-story-img" accept="image/*" style="display:none;" onchange="handleStoryImg(event)">
+          <div id="story-preview" style="margin-top:10px;"></div>
+        </div>
+        <button class="a-submit-btn" onclick="submitStory()">스토리 업로드</button>
       </div>
-      <button class="admin-submit-btn" onclick="submitStory()">스토리 업로드</button>
-    </div>
 
-    <!-- Admin: Profiles -->
-    <div class="admin-content hidden" id="admin-profiles-tab">
-      <div class="member-profile-cards" id="admin-profile-cards"></div>
+      <!-- Profiles pane -->
+      <div class="admin-pane" id="pane-profiles">
+        <div class="prof-cards" id="prof-cards"></div>
+      </div>
+
     </div>
   </div>
 
@@ -1559,1332 +1295,985 @@ a { text-decoration: none; color: inherit; }
 
 <!-- ===== LIGHTBOX ===== -->
 <div id="lightbox">
-  <button class="lb-close" onclick="closeLightbox()">✕</button>
-  <div class="lb-img-wrap">
-    <div class="lb-img-track" id="lb-track"></div>
-    <button class="lb-arrow prev" id="lb-prev" onclick="lbPrev()">‹</button>
-    <button class="lb-arrow next" id="lb-next" onclick="lbNext()">›</button>
+  <button class="lb-close" onclick="closeLb()">✕</button>
+  <div class="lb-track-wrap">
+    <div class="lb-track" id="lb-track"></div>
+    <button class="lb-arr prev" id="lb-prev" onclick="lbMove(-1)">‹</button>
+    <button class="lb-arr next" id="lb-next" onclick="lbMove(1)">›</button>
   </div>
-  <div class="lb-counter" id="lb-counter"></div>
+  <div class="lb-counter" id="lb-cnt"></div>
 </div>
 
 <!-- ===== PASSWORD MODAL ===== -->
-<div class="pw-modal-overlay" id="pw-modal">
-  <div class="pw-modal">
+<div class="pw-overlay" id="pw-modal">
+  <div class="pw-box">
     <h3>🔒 비밀포스트</h3>
-    <p>이 게시물을 보려면 비밀번호가 필요합니다</p>
-    <input type="password" id="pw-input" placeholder="비밀번호 입력" onkeyup="if(event.key==='Enter')confirmPw()">
-    <div class="pw-modal-btns">
-      <button class="pw-cancel" onclick="closePwModal()">취소</button>
-      <button class="pw-confirm" onclick="confirmPw()">확인</button>
+    <p>비밀번호를 입력하면 내용을 볼 수 있어요</p>
+    <input type="password" id="pw-inp" placeholder="비밀번호" onkeyup="if(event.key==='Enter')pwConfirm()">
+    <div class="pw-btns">
+      <button class="pw-cancel" onclick="pwClose()">취소</button>
+      <button class="pw-confirm" onclick="pwConfirm()">확인</button>
     </div>
   </div>
 </div>
 
 <!-- ===== STORY VIEWER ===== -->
-<div id="story-viewer">
-  <div class="sv-header">
-    <div class="sv-progress"><div class="sv-progress-bar" id="sv-progress-bar"></div></div>
-    <div class="sv-avatar"><img id="sv-avatar-img" src="" alt=""></div>
-    <div>
-      <div class="sv-name" id="sv-name"></div>
-      <div class="sv-time" id="sv-time"></div>
+<div id="sv">
+  <img id="sv-img" class="sv-bg" src="" alt="">
+  <div class="sv-overlay">
+    <div class="sv-top">
+      <div class="sv-prog"><div class="sv-bar" id="sv-bar"></div></div>
     </div>
-    <button class="sv-close" onclick="closeStoryViewer()">✕</button>
-  </div>
-  <div class="sv-content">
-    <img id="sv-img" src="" alt="">
-  </div>
-  <div class="sv-nav">
-    <div class="sv-nav-area" onclick="svPrev()"></div>
-    <div class="sv-nav-area" onclick="svNext()"></div>
+    <div class="sv-user">
+      <div class="sv-uav"><img id="sv-av" src="" alt="" onerror="this.style.display='none'"></div>
+      <div>
+        <div class="sv-uname" id="sv-uname"></div>
+        <div class="sv-utime" id="sv-utime"></div>
+      </div>
+      <button class="sv-x" onclick="svClose()">✕</button>
+    </div>
+    <div class="sv-taps">
+      <div class="sv-tap" onclick="svMove(-1)"></div>
+      <div class="sv-tap" onclick="svMove(1)"></div>
+    </div>
   </div>
 </div>
 
 <!-- ===== EDIT MEMBER MODAL ===== -->
-<div class="edit-modal-overlay" id="edit-member-modal">
-  <div class="edit-modal">
-    <h3 id="edit-member-title">멤버 프로필 편집</h3>
-    <div class="admin-section">
-      <label class="admin-label">프로필 사진</label>
-      <div class="image-upload-area" onclick="document.getElementById('profile-img-input').click()" style="padding:16px;">
-        <div id="profile-preview" style="text-align:center;">
-          <div style="font-size:24px;">👤</div>
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-sheet">
+    <h3 id="edit-title">프로필 편집</h3>
+    <div class="a-section">
+      <label class="a-label">프로필 사진</label>
+      <div class="img-drop" style="padding:16px;" onclick="document.getElementById('prof-img-in').click()">
+        <div id="prof-img-preview" style="text-align:center;">
+          <div style="font-size:28px;">👤</div>
           <div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>
         </div>
-        <input type="file" id="profile-img-input" accept="image/*" style="display:none;" onchange="handleProfileImgSelect(event)">
+        <input type="file" id="prof-img-in" accept="image/*" style="display:none;" onchange="handleProfImg(event)">
       </div>
     </div>
-    <div class="admin-section">
-      <label class="admin-label">이름</label>
-      <input class="admin-input" type="text" id="edit-member-name">
+    <div class="a-section">
+      <label class="a-label">이름</label>
+      <input class="a-input" type="text" id="edit-name">
     </div>
-    <div class="admin-section">
-      <label class="admin-label">아이디 (Twitter)</label>
-      <input class="admin-input" type="text" id="edit-member-handle" placeholder="@handle">
+    <div class="a-section">
+      <label class="a-label">아이디</label>
+      <input class="a-input" type="text" id="edit-handle" placeholder="@handle">
     </div>
-    <div class="admin-section">
-      <label class="admin-label">소개글</label>
-      <textarea class="admin-textarea" id="edit-member-bio" style="min-height:80px;"></textarea>
+    <div class="a-section">
+      <label class="a-label">소개글</label>
+      <textarea class="a-textarea" id="edit-bio" style="min-height:72px;"></textarea>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="pw-cancel" style="flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:600;" onclick="closeEditMember()">취소</button>
-      <button class="pw-confirm" style="flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:600;" onclick="saveEditMember()">저장</button>
+      <button style="flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:700;background:var(--bg3);color:var(--text);" onclick="editClose()">취소</button>
+      <button style="flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#b37fd4,#7eb8f7);color:#fff;" onclick="editSave()">저장</button>
     </div>
   </div>
 </div>
 
 <!-- Dropdown overlay -->
-<div id="dropdown-overlay" style="display:none;position:fixed;inset:0;z-index:150;" onclick="closeAllDropdowns()"></div>
+<div id="dd-overlay" style="display:none;position:fixed;inset:0;z-index:490;" onclick="ddClose()"></div>
 
-<!-- ===== FIREBASE + APP SCRIPTS ===== -->
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ===== SCRIPTS ===== -->
 <script type="module">
-// ===========================
-// FIREBASE CONFIG
-// ===========================
+// ============================================================
+// FIREBASE
+// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-  getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, 
-  query, orderBy, onSnapshot, serverTimestamp, getDoc, setDoc 
+import {
+  getFirestore, collection, addDoc, getDocs, doc,
+  updateDoc, deleteDoc, query, orderBy, onSnapshot,
+  setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
+const fbApp = initializeApp({
   apiKey: "AIzaSyAA6mbdYfLrrgCJjN47PX91_mU7I53RiBs",
   authDomain: "site-c67b4.firebaseapp.com",
   projectId: "site-c67b4",
   storageBucket: "site-c67b4.firebasestorage.app",
   messagingSenderId: "744761377245",
   appId: "1:744761377245:web:3ddaee14f184716eeef634"
-};
-
-const fbApp = initializeApp(firebaseConfig);
+});
 const db = getFirestore(fbApp);
 
-// ===========================
-// CLOUDINARY CONFIG
-// ===========================
-const CLOUDINARY_CLOUD = 'dbljkloal';
-const CLOUDINARY_PRESET = 'clowofficial';
+// ============================================================
+// CLOUDINARY
+// ============================================================
+const CLD_CLOUD = 'dbljkloal';
+const CLD_PRESET = 'clowofficial';
 
-// ===========================
+async function uploadCld(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLD_PRESET);
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, { method:'POST', body:fd });
+  const d = await r.json();
+  if (!d.secure_url) throw new Error('Cloudinary 업로드 실패');
+  return d.secure_url;
+}
+
+// ============================================================
 // CONSTANTS
-// ===========================
-const MEMBERS = ['션린위', '해인', '로아', '남해주', '로은', '서도윤', '루이', '범지유'];
-const MEMBER_EMOJIS = ['🌸','🌊','🌙','🍀','🌿','⭐','🌺','🦋'];
+// ============================================================
+const MEMBERS = ['션린위','해인','로아','남해주','로은','서도윤','루이','범지유'];
+const EMOJIS  = ['🌸','🌊','🌙','🍀','🌿','⭐','🌺','🦋'];
 
-// ===========================
+// ============================================================
 // STATE
-// ===========================
-let allPosts = [];
-let allStories = [];
-let memberProfiles = {};
-let currentPlatform = 'twitter';
-let twFilters = new Set(['all']);
-let wvFilters = new Set(['all']);
-let igFilters = new Set(['all']);
-let selectedMember = null;
-let selectedStoryMember = null;
-let editingMember = null;
-let profileImgFile = null;
-let profileImgUrl = null;
-let postImages = [];
-let storyImgFile = null;
-let storyImgUrl = null;
-let isSecretPost = false;
-let currentDropdownId = null;
-let unlockedSecrets = new Set();
+// ============================================================
+let allPosts = [], allStories = [], profiles = {};
+let platform = 'twitter';
+let twSel = new Set(['all']), wvSel = new Set(['all']), igSel = new Set(['all']);
+let postImgs = [], storyImgFile = null, storyMember = null;
+let profImgFile = null, editingMember = null;
+let isSecret = false;
+let unlockedIds = new Set();
+let pendingPwId = null;
+let lbImgs = [], lbIdx = 0, lbTouchX = 0;
+let svList = [], svIdx = 0, svTimer = null;
 
-// Lightbox state
-let lbImages = [];
-let lbIndex = 0;
-let lbStartX = 0;
-
-// Story viewer state
-let currentStories = [];
-let svIndex = 0;
-let svTimer = null;
-let svStartX = 0;
-
-// pw modal state
-let pendingSecretId = null;
-let pendingSecretCallback = null;
-
-// ===========================
-// INIT
-// ===========================
+// ============================================================
+// BOOT
+// ============================================================
 window.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
-  buildMemberFilters();
-  buildAdminMemberGrids();
-  buildAdminProfileCards();
-  setDefaultDate();
-  onAdminPlatformChange();
-  
-  // Real-time listeners
-  const postsQ = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
-  onSnapshot(postsQ, (snap) => {
-    allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderCurrentPlatform();
+  applyTheme(localStorage.getItem('clow-theme') || 'dark');
+  buildFilters();
+  buildAdminGrids();
+  setNow();
+  onPlatformChange();
+
+  // Posts realtime
+  onSnapshot(query(collection(db,'posts'), orderBy('timestamp','desc')), snap => {
+    allPosts = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderCurrent();
   });
 
-  const storiesQ = query(collection(db, 'stories'), orderBy('timestamp', 'desc'));
-  onSnapshot(storiesQ, (snap) => {
-    allStories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderStoriesBar();
+  // Stories realtime
+  onSnapshot(query(collection(db,'stories'), orderBy('timestamp','desc')), snap => {
+    allStories = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderStories();
   });
 
-  // Load profiles
   await loadProfiles();
-  renderCurrentPlatform();
+  renderCurrent();
 });
 
-// ===========================
+// ============================================================
 // THEME
-// ===========================
-function initTheme() {
-  const saved = localStorage.getItem('clow-theme') || 'dark';
-  document.body.setAttribute('data-theme', saved);
-  document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
-}
-window.toggleTheme = function() {
-  const current = document.body.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.body.setAttribute('data-theme', next);
-  localStorage.setItem('clow-theme', next);
-  document.getElementById('theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
-};
-
-// ===========================
-// PLATFORM SWITCH
-// ===========================
-window.switchPlatform = function(platform) {
-  currentPlatform = platform;
-  document.querySelectorAll('.platform-view').forEach(v => v.classList.remove('active'));
-  document.getElementById(`${platform}-view`).classList.add('active');
-  document.getElementById('admin-view').classList.remove('active');
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['twitter','weverse','instagram'][i] === platform);
+// ============================================================
+function applyTheme(t) {
+  document.body.setAttribute('data-theme', t);
+  localStorage.setItem('clow-theme', t);
+  const ico = t === 'dark' ? '☀️' : '🌙';
+  ['dt-theme-icon','tw-theme-icon','ig-theme-icon'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = ico;
   });
-  renderCurrentPlatform();
+  // weverse theme button (no id, find by header)
+  document.querySelectorAll('.tw-theme-btn').forEach(b => b.textContent = ico);
+  document.getElementById('meta-theme-color').setAttribute('content', t === 'dark' ? '#000000' : '#ffffff');
+}
+window.toggleTheme = () => applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+
+// ============================================================
+// PLATFORM SWITCH
+// ============================================================
+window.switchPlatform = function(p) {
+  platform = p;
+  // views
+  document.querySelectorAll('.platform-view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`${p}-view`).classList.add('active');
+  document.getElementById('admin-view').classList.remove('active');
+  // desktop tabs
+  document.querySelectorAll('.dt-tab').forEach((b,i) => b.classList.toggle('active', ['twitter','weverse','instagram'][i]===p));
+  // bottom nav
+  ['twitter','weverse','instagram'].forEach(k => {
+    document.getElementById(`bn-${k}`)?.classList.toggle('active', k===p);
+  });
+  document.getElementById('bn-admin')?.classList.remove('active');
+  renderCurrent();
 };
 
-function renderCurrentPlatform() {
-  if (currentPlatform === 'twitter') renderTwitter();
-  else if (currentPlatform === 'weverse') renderWeverse();
+function renderCurrent() {
+  if (platform==='twitter') renderTwitter();
+  else if (platform==='weverse') renderWeverse();
   else renderInstagram();
 }
 
-// ===========================
+// ============================================================
 // ADMIN
-// ===========================
+// ============================================================
 window.openAdmin = function() {
   document.querySelectorAll('.platform-view').forEach(v => v.classList.remove('active'));
   document.getElementById('admin-view').classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.dt-tab, .bn-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('bn-admin')?.classList.add('active');
 };
-
 window.closeAdmin = function() {
   document.getElementById('admin-view').classList.remove('active');
-  switchPlatform(currentPlatform);
+  switchPlatform(platform);
 };
-
 window.switchAdminTab = function(tab, btn) {
-  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.a-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('admin-post-tab').classList.toggle('hidden', tab !== 'post');
-  document.getElementById('admin-story-tab').classList.toggle('hidden', tab !== 'story');
-  document.getElementById('admin-profiles-tab').classList.toggle('hidden', tab !== 'profiles');
+  document.querySelectorAll('.admin-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`pane-${tab}`).classList.add('active');
 };
 
-// ===========================
-// MEMBER FILTERS
-// ===========================
-function buildMemberFilters() {
-  const twFilter = document.getElementById('tw-member-filter');
-  const wvTabs = document.getElementById('wv-member-tabs');
-  const igFilter = document.getElementById('ig-member-filter');
-
+// ============================================================
+// FILTERS
+// ============================================================
+function buildFilters() {
   MEMBERS.forEach(m => {
     // Twitter
-    const b1 = document.createElement('button');
-    b1.className = 'member-chip';
-    b1.dataset.member = m;
-    b1.textContent = m;
-    b1.onclick = () => toggleTwFilter(m, b1);
-    twFilter.appendChild(b1);
+    const t = mk('button','tw-chip'); t.dataset.m = m; t.textContent = m;
+    t.onclick = () => twFilter(m, t);
+    document.getElementById('tw-chips').appendChild(t);
 
     // Weverse
-    const b2 = document.createElement('button');
-    b2.className = 'wv-member-tab';
-    b2.dataset.member = m;
-    b2.textContent = m;
-    b2.onclick = () => toggleWvFilter(m, b2);
-    wvTabs.appendChild(b2);
+    const w = mk('button','wv-m-tab'); w.dataset.m = m; w.textContent = m;
+    w.onclick = () => wvFilter(m, w);
+    document.getElementById('wv-tabs').appendChild(w);
 
     // Instagram
-    const b3 = document.createElement('button');
-    b3.className = 'member-chip';
-    b3.dataset.member = m;
-    b3.textContent = m;
-    b3.onclick = () => toggleIgFilter(m, b3);
-    igFilter.appendChild(b3);
+    const i = mk('button','tw-chip'); i.dataset.m = m; i.textContent = m;
+    i.onclick = () => igFilter(m, i);
+    document.getElementById('ig-chips').appendChild(i);
   });
 }
 
-window.toggleTwFilter = function(member, btn) {
-  if (member === 'all') {
-    twFilters = new Set(['all']);
-  } else {
-    twFilters.delete('all');
-    if (twFilters.has(member)) twFilters.delete(member);
-    else twFilters.add(member);
-    if (twFilters.size === 0) twFilters.add('all');
+function toggleFilter(set, member) {
+  if (member==='all') { set.clear(); set.add('all'); }
+  else {
+    set.delete('all');
+    if (set.has(member)) set.delete(member);
+    else set.add(member);
+    if (set.size===0) set.add('all');
   }
-  document.querySelectorAll('#tw-member-filter .member-chip').forEach(b => {
-    const m = b.dataset.member;
-    b.classList.toggle('active', twFilters.has(m) || (twFilters.has('all') && m === 'all'));
-  });
+}
+
+window.twFilter = function(m, btn) {
+  toggleFilter(twSel, m);
+  syncChips('#tw-chips .tw-chip', twSel);
   renderTwitter();
 };
-
-window.toggleWvFilter = function(member, btn) {
-  if (member === 'all') {
-    wvFilters = new Set(['all']);
-  } else {
-    wvFilters.delete('all');
-    if (wvFilters.has(member)) wvFilters.delete(member);
-    else wvFilters.add(member);
-    if (wvFilters.size === 0) wvFilters.add('all');
-  }
-  document.querySelectorAll('#wv-member-tabs .wv-member-tab').forEach(b => {
-    const m = b.dataset.member;
-    b.classList.toggle('active', wvFilters.has(m) || (wvFilters.has('all') && m === 'all'));
-  });
+window.wvFilter = function(m, btn) {
+  toggleFilter(wvSel, m);
+  syncChips('#wv-tabs .wv-m-tab', wvSel);
   renderWeverse();
 };
-
-window.toggleIgFilter = function(member, btn) {
-  if (member === 'all') {
-    igFilters = new Set(['all']);
-  } else {
-    igFilters.delete('all');
-    if (igFilters.has(member)) igFilters.delete(member);
-    else igFilters.add(member);
-    if (igFilters.size === 0) igFilters.add('all');
-  }
-  document.querySelectorAll('#ig-member-filter .member-chip').forEach(b => {
-    const m = b.dataset.member;
-    b.classList.toggle('active', igFilters.has(m) || (igFilters.has('all') && m === 'all'));
-  });
+window.igFilter = function(m, btn) {
+  toggleFilter(igSel, m);
+  syncChips('#ig-chips .tw-chip', igSel);
   renderInstagram();
 };
 
-// ===========================
-// PROFILES
-// ===========================
-async function loadProfiles() {
-  for (const m of MEMBERS) {
-    const ref = doc(db, 'profiles', m);
-    try {
-      const snap = await getDoc(ref);
-      if (snap.exists()) memberProfiles[m] = snap.data();
-      else memberProfiles[m] = { name: m, handle: '@'+m.toLowerCase(), bio: '', photo: '' };
-    } catch(e) {
-      memberProfiles[m] = { name: m, handle: '@'+m.toLowerCase(), bio: '', photo: '' };
-    }
-  }
-}
-
-function buildAdminProfileCards() {
-  const grid = document.getElementById('admin-profile-cards');
-  grid.innerHTML = '';
-  MEMBERS.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'member-profile-card';
-    card.innerHTML = `
-      <div class="member-profile-card-avatar" id="pcard-avatar-${i}">
-        ${MEMBER_EMOJIS[i]}
-      </div>
-      <div class="member-profile-card-name">${m}</div>
-      <div class="member-profile-card-handle" id="pcard-handle-${i}">@${m.toLowerCase()}</div>
-    `;
-    card.onclick = () => openEditMember(m);
-    grid.appendChild(card);
+function syncChips(sel, set) {
+  document.querySelectorAll(sel).forEach(b => {
+    const m = b.dataset.m;
+    b.classList.toggle('active', set.has(m) || (set.has('all') && m==='all'));
   });
 }
 
-function refreshProfileCards() {
-  MEMBERS.forEach((m, i) => {
-    const p = memberProfiles[m];
-    if (!p) return;
-    const av = document.getElementById(`pcard-avatar-${i}`);
-    const handle = document.getElementById(`pcard-handle-${i}`);
-    if (av) {
-      av.innerHTML = p.photo ? `<img src="${p.photo}" alt="${m}">` : MEMBER_EMOJIS[i];
-    }
-    if (handle) handle.textContent = p.handle || '@'+m.toLowerCase();
-  });
-}
+// ============================================================
+// SEARCH + FILTER POSTS
+// ============================================================
+function filtered(plat) {
+  const sel = plat==='twitter' ? twSel : plat==='weverse' ? wvSel : igSel;
+  const q = (document.getElementById(plat==='twitter'?'tw-search':plat==='weverse'?'wv-search':'ig-search')?.value||'').toLowerCase().trim();
 
-window.openEditMember = function(member) {
-  editingMember = member;
-  profileImgFile = null;
-  profileImgUrl = null;
-  const p = memberProfiles[member] || {};
-  document.getElementById('edit-member-title').textContent = `${member} 프로필 편집`;
-  document.getElementById('edit-member-name').value = p.name || member;
-  document.getElementById('edit-member-handle').value = p.handle || '@'+member.toLowerCase();
-  document.getElementById('edit-member-bio').value = p.bio || '';
-  const preview = document.getElementById('profile-preview');
-  preview.innerHTML = p.photo 
-    ? `<img src="${p.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`
-    : `<div style="font-size:24px;">👤</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>`;
-  document.getElementById('edit-member-modal').classList.add('open');
-};
-
-window.closeEditMember = function() {
-  document.getElementById('edit-member-modal').classList.remove('open');
-  editingMember = null;
-};
-
-window.handleProfileImgSelect = function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  profileImgFile = file;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const preview = document.getElementById('profile-preview');
-    preview.innerHTML = `<img src="${ev.target.result}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`;
-  };
-  reader.readAsDataURL(file);
-};
-
-window.saveEditMember = async function() {
-  if (!editingMember) return;
-  showToast('저장 중...');
-  
-  let photoUrl = memberProfiles[editingMember]?.photo || '';
-  if (profileImgFile) {
-    photoUrl = await uploadToCloudinary(profileImgFile);
-  }
-
-  const data = {
-    name: document.getElementById('edit-member-name').value,
-    handle: document.getElementById('edit-member-handle').value,
-    bio: document.getElementById('edit-member-bio').value,
-    photo: photoUrl
-  };
-
-  try {
-    await setDoc(doc(db, 'profiles', editingMember), data);
-    memberProfiles[editingMember] = data;
-    refreshProfileCards();
-    renderCurrentPlatform();
-    closeEditMember();
-    showToast('✅ 프로필이 저장되었습니다');
-  } catch(e) {
-    showToast('❌ 저장 실패: '+e.message);
-  }
-};
-
-// ===========================
-// ADMIN: POST
-// ===========================
-function buildAdminMemberGrids() {
-  ['admin-member-grid', 'admin-story-member-grid'].forEach(gridId => {
-    const grid = document.getElementById(gridId);
-    grid.innerHTML = '';
-    MEMBERS.forEach(m => {
-      const chip = document.createElement('div');
-      chip.className = 'member-select-chip';
-      chip.textContent = m;
-      chip.dataset.member = m;
-      chip.onclick = () => {
-        if (gridId === 'admin-story-member-grid') {
-          grid.querySelectorAll('.member-select-chip').forEach(c => c.classList.remove('selected'));
-          chip.classList.add('selected');
-          selectedStoryMember = m;
-        } else {
-          chip.classList.toggle('selected');
-        }
-      };
-      grid.appendChild(chip);
-    });
-  });
-}
-
-function setDefaultDate() {
-  const now = new Date();
-  const local = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-  document.getElementById('admin-date').value = local;
-}
-
-window.onAdminPlatformChange = function() {
-  const platform = document.getElementById('admin-platform').value;
-  const secretSection = document.getElementById('admin-secret-section');
-  const imgSection = document.getElementById('admin-image-section');
-  const limitText = document.getElementById('img-limit-text');
-  const subText = document.getElementById('upload-sub-text');
-  
-  secretSection.style.display = platform === 'weverse' ? 'block' : 'none';
-  
-  if (platform === 'twitter') {
-    limitText.textContent = '(최대 4장)';
-    subText.textContent = '최대 4장까지 첨부 가능합니다';
-    document.getElementById('admin-img-input').multiple = true;
-    imgSection.style.display = 'block';
-  } else if (platform === 'weverse') {
-    limitText.textContent = '(제한 없음)';
-    subText.textContent = '이미지를 선택하거나 없이도 게시 가능합니다';
-    document.getElementById('admin-img-input').multiple = true;
-    imgSection.style.display = 'block';
-  } else {
-    limitText.textContent = '(최대 10장, 필수)';
-    subText.textContent = '최대 10장까지 첨부 가능합니다';
-    document.getElementById('admin-img-input').multiple = true;
-    imgSection.style.display = 'block';
-  }
-  
-  postImages = [];
-  renderImgPreview();
-};
-
-window.toggleSecret = function() {
-  isSecretPost = !isSecretPost;
-  const toggle = document.getElementById('secret-toggle');
-  toggle.classList.toggle('on', isSecretPost);
-  document.getElementById('secret-pw-section').style.display = isSecretPost ? 'block' : 'none';
-};
-
-window.handleImageSelect = function(e) {
-  const platform = document.getElementById('admin-platform').value;
-  const maxImages = platform === 'twitter' ? 4 : platform === 'instagram' ? 10 : 999;
-  const files = Array.from(e.target.files);
-  
-  files.forEach(file => {
-    if (postImages.length < maxImages) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        postImages.push({ file, preview: ev.target.result });
-        renderImgPreview();
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-  e.target.value = '';
-};
-
-function renderImgPreview() {
-  const grid = document.getElementById('img-preview-grid');
-  grid.innerHTML = '';
-  postImages.forEach((img, idx) => {
-    const item = document.createElement('div');
-    item.className = 'img-preview-item';
-    item.innerHTML = `
-      <img src="${img.preview}" alt="">
-      <div class="img-preview-remove" onclick="removePostImage(${idx})">✕</div>
-    `;
-    grid.appendChild(item);
-  });
-}
-
-window.removePostImage = function(idx) {
-  postImages.splice(idx, 1);
-  renderImgPreview();
-};
-
-window.submitPost = async function() {
-  const platform = document.getElementById('admin-platform').value;
-  const member = Array.from(document.querySelectorAll('#admin-member-grid .member-select-chip.selected')).map(c => c.dataset.member);
-  const era = document.getElementById('admin-era').value.trim();
-  const dateVal = document.getElementById('admin-date').value;
-  const content = document.getElementById('admin-content').value.trim();
-
-  if (!member.length) return showToast('❌ 멤버를 선택해주세요');
-  if (platform === 'instagram' && postImages.length === 0) return showToast('❌ 인스타그램은 이미지가 필수입니다');
-
-  const btn = document.getElementById('admin-submit-btn');
-  btn.disabled = true;
-  btn.textContent = '업로드 중...';
-
-  try {
-    let imageUrls = [];
-    for (const img of postImages) {
-      const url = await uploadToCloudinary(img.file);
-      imageUrls.push(url);
-    }
-
-    const likes = platform === 'twitter' 
-      ? Math.floor(Math.random() * 4200) + 800
-      : Math.floor(Math.random() * 2700) + 300;
-    const retweets = platform === 'twitter' 
-      ? Math.floor(likes * (0.1 + Math.random() * 0.3))
-      : 0;
-
-    const postData = {
-      platform,
-      member: member[0],
-      members: member,
-      era,
-      content,
-      images: imageUrls,
-      timestamp: dateVal ? new Date(dateVal) : new Date(),
-      likes,
-      retweets,
-      userLikes: 0,
-      isSecret: platform === 'weverse' && isSecretPost,
-      secretPassword: (platform === 'weverse' && isSecretPost) ? document.getElementById('admin-secret-pw').value : '',
-    };
-
-    await addDoc(collection(db, 'posts'), postData);
-
-    // Reset
-    document.getElementById('admin-content').value = '';
-    document.getElementById('admin-era').value = '';
-    postImages = [];
-    renderImgPreview();
-    document.querySelectorAll('#admin-member-grid .member-select-chip').forEach(c => c.classList.remove('selected'));
-    isSecretPost = false;
-    document.getElementById('secret-toggle').classList.remove('on');
-    document.getElementById('secret-pw-section').style.display = 'none';
-    document.getElementById('admin-secret-pw').value = '';
-    setDefaultDate();
-
-    showToast('✅ 게시글이 업로드되었습니다');
-  } catch(e) {
-    showToast('❌ 업로드 실패: '+e.message);
-  }
-
-  btn.disabled = false;
-  btn.textContent = '게시하기';
-};
-
-// Story
-window.handleStoryImageSelect = function(e) {
-  storyImgFile = e.target.files[0];
-  if (!storyImgFile) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('story-img-preview').innerHTML = 
-      `<img src="${ev.target.result}" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px;">`;
-    storyImgUrl = ev.target.result;
-  };
-  reader.readAsDataURL(storyImgFile);
-};
-
-window.submitStory = async function() {
-  if (!selectedStoryMember) return showToast('❌ 멤버를 선택해주세요');
-  if (!storyImgFile) return showToast('❌ 이미지를 선택해주세요');
-
-  showToast('스토리 업로드 중...');
-  try {
-    const url = await uploadToCloudinary(storyImgFile);
-    await addDoc(collection(db, 'stories'), {
-      member: selectedStoryMember,
-      imageUrl: url,
-      timestamp: new Date()
-    });
-    storyImgFile = null;
-    storyImgUrl = null;
-    selectedStoryMember = null;
-    document.getElementById('story-img-preview').innerHTML = '';
-    document.querySelectorAll('#admin-story-member-grid .member-select-chip').forEach(c => c.classList.remove('selected'));
-    showToast('✅ 스토리가 업로드되었습니다');
-  } catch(e) {
-    showToast('❌ 스토리 업로드 실패: '+e.message);
-  }
-};
-
-// ===========================
-// CLOUDINARY UPLOAD
-// ===========================
-async function uploadToCloudinary(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', CLOUDINARY_PRESET);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-    method: 'POST', body: formData
-  });
-  const data = await res.json();
-  if (!data.secure_url) throw new Error('Cloudinary upload failed');
-  return data.secure_url;
-}
-
-// ===========================
-// FILTER HELPERS
-// ===========================
-function filterPosts(platform) {
-  const filters = platform === 'twitter' ? twFilters : platform === 'weverse' ? wvFilters : igFilters;
-  const searchQuery = (document.getElementById(`${platform === 'twitter' ? 'tw' : platform === 'weverse' ? 'wv' : 'ig'}-search`)?.value || '').toLowerCase().trim();
-  
   return allPosts.filter(p => {
-    if (p.platform !== platform) return false;
-    
-    // Member filter
-    if (!filters.has('all') && !filters.has(p.member) && !p.members?.some(m => filters.has(m))) return false;
-    
-    // Search filter
-    if (searchQuery) {
-      const matchMember = p.member?.toLowerCase().includes(searchQuery) || p.members?.some(m => m.toLowerCase().includes(searchQuery));
-      const matchContent = p.content?.toLowerCase().includes(searchQuery);
-      const matchEra = p.era?.toLowerCase().includes(searchQuery);
-      const matchDate = p.timestamp?.toDate ? formatDate(p.timestamp.toDate()).includes(searchQuery) : false;
-      if (!matchMember && !matchContent && !matchEra && !matchDate) return false;
+    if (p.platform !== plat) return false;
+    if (!sel.has('all') && !sel.has(p.member) && !(p.members||[]).some(m=>sel.has(m))) return false;
+    if (q) {
+      const ts = [p.member,...(p.members||[]),p.content||'',p.era||'', fmtDate(getDate(p.timestamp))].join(' ').toLowerCase();
+      if (!ts.includes(q)) return false;
     }
-    
     return true;
   });
 }
 
-// ===========================
-// DATE HELPERS
-// ===========================
-function formatDate(date) {
-  if (!date) return '';
-  if (!(date instanceof Date)) {
-    if (date?.toDate) date = date.toDate();
-    else date = new Date(date);
+// ============================================================
+// PROFILES
+// ============================================================
+async function loadProfiles() {
+  for (const m of MEMBERS) {
+    try {
+      const s = await getDoc(doc(db,'profiles',m));
+      profiles[m] = s.exists() ? s.data() : defaultProfile(m);
+    } catch { profiles[m] = defaultProfile(m); }
   }
+  buildProfCards();
+}
+function defaultProfile(m) { return { name:m, handle:'@'+m.toLowerCase().replace(/\s/g,''), bio:'', photo:'' }; }
+
+function buildProfCards() {
+  const el = document.getElementById('prof-cards');
+  el.innerHTML = '';
+  MEMBERS.forEach((m,i) => {
+    const p = profiles[m]||defaultProfile(m);
+    const card = mk('div','prof-card');
+    card.innerHTML = `
+      <div class="prof-card-av" id="pav-${i}">${p.photo?`<img src="${p.photo}" alt="">`:(EMOJIS[i]||'👤')}</div>
+      <div class="prof-card-name">${m}</div>
+      <div class="prof-card-handle" id="phandle-${i}">${p.handle||''}</div>
+    `;
+    card.onclick = () => openEdit(m);
+    el.appendChild(card);
+  });
+}
+
+function buildAdminGrids() {
+  ['a-member-grid','a-story-grid'].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    MEMBERS.forEach(m => {
+      const c = mk('div','m-chip'); c.textContent = m; c.dataset.m = m;
+      c.onclick = () => {
+        if (id==='a-story-grid') {
+          el.querySelectorAll('.m-chip').forEach(x=>x.classList.remove('on'));
+          c.classList.add('on'); storyMember = m;
+        } else {
+          c.classList.toggle('on');
+        }
+      };
+      el.appendChild(c);
+    });
+  });
+}
+
+// ============================================================
+// PROFILE EDIT
+// ============================================================
+window.openEdit = function(m) {
+  editingMember = m; profImgFile = null;
+  const p = profiles[m]||defaultProfile(m);
+  document.getElementById('edit-title').textContent = m+' 프로필 편집';
+  document.getElementById('edit-name').value = p.name||m;
+  document.getElementById('edit-handle').value = p.handle||'';
+  document.getElementById('edit-bio').value = p.bio||'';
+  const prev = document.getElementById('prof-img-preview');
+  prev.innerHTML = p.photo
+    ? `<img src="${p.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`
+    : `<div style="font-size:28px;">👤</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>`;
+  document.getElementById('edit-overlay').classList.add('open');
+};
+window.editClose = () => document.getElementById('edit-overlay').classList.remove('open');
+
+window.handleProfImg = function(e) {
+  profImgFile = e.target.files[0];
+  if (!profImgFile) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('prof-img-preview').innerHTML =
+      `<img src="${ev.target.result}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`;
+  };
+  r.readAsDataURL(profImgFile);
+};
+
+window.editSave = async function() {
+  if (!editingMember) return;
+  toast('저장 중...');
+  let photo = profiles[editingMember]?.photo||'';
+  if (profImgFile) photo = await uploadCld(profImgFile);
+  const data = {
+    name: document.getElementById('edit-name').value,
+    handle: document.getElementById('edit-handle').value,
+    bio: document.getElementById('edit-bio').value,
+    photo
+  };
+  try {
+    await setDoc(doc(db,'profiles',editingMember), data);
+    profiles[editingMember] = data;
+    buildProfCards();
+    renderCurrent();
+    editClose();
+    toast('✅ 프로필 저장 완료');
+  } catch(e) { toast('❌ 저장 실패: '+e.message); }
+};
+
+// ============================================================
+// ADMIN: POST
+// ============================================================
+window.onPlatformChange = function() {
+  const plat = document.getElementById('a-platform').value;
+  document.getElementById('a-secret-row').style.display = plat==='weverse' ? 'block' : 'none';
+  const hints = { twitter:'최대 4장', weverse:'제한 없음, 선택 사항', instagram:'최대 10장, 필수' };
+  document.getElementById('a-img-hint').textContent = `(${hints[plat]})`;
+  document.getElementById('a-img-sub').textContent = hints[plat];
+  postImgs = []; renderImgPrev();
+};
+
+window.toggleSecret = function() {
+  isSecret = !isSecret;
+  document.getElementById('a-secret-tog').classList.toggle('on', isSecret);
+  document.getElementById('a-pw-row').style.display = isSecret ? 'block' : 'none';
+};
+
+window.handleImgs = function(e) {
+  const plat = document.getElementById('a-platform').value;
+  const max = plat==='twitter'?4:plat==='instagram'?10:999;
+  Array.from(e.target.files).forEach(file => {
+    if (postImgs.length >= max) return;
+    const r = new FileReader();
+    r.onload = ev => { postImgs.push({file, prev:ev.target.result}); renderImgPrev(); };
+    r.readAsDataURL(file);
+  });
+  e.target.value='';
+};
+
+function renderImgPrev() {
+  const el = document.getElementById('a-img-previews');
+  el.innerHTML = postImgs.map((img,i) => `
+    <div class="img-prev">
+      <img src="${img.prev}">
+      <div class="img-prev-x" onclick="rmImg(${i})">✕</div>
+    </div>
+  `).join('');
+}
+window.rmImg = function(i) { postImgs.splice(i,1); renderImgPrev(); };
+
+function setNow() {
   const now = new Date();
-  const diff = (now - date) / 1000;
-  if (diff < 60) return '방금 전';
-  if (diff < 3600) return `${Math.floor(diff/60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff/3600)}시간 전`;
-  if (diff < 604800) return `${Math.floor(diff/86400)}일 전`;
-  return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', year: 'numeric' });
+  document.getElementById('a-date').value = new Date(now - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
 }
 
-function formatDateShort(date) {
-  if (!date) return '';
-  if (date?.toDate) date = date.toDate();
-  else if (!(date instanceof Date)) date = new Date(date);
-  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-}
+window.submitPost = async function() {
+  const plat = document.getElementById('a-platform').value;
+  const members = [...document.querySelectorAll('#a-member-grid .m-chip.on')].map(c=>c.dataset.m);
+  if (!members.length) return toast('❌ 멤버를 선택해주세요');
+  if (plat==='instagram' && postImgs.length===0) return toast('❌ 인스타는 이미지 필수');
 
-// ===========================
-// AVATAR HELPER
-// ===========================
-function getAvatar(member, size=40, cls='') {
-  const p = memberProfiles[member];
-  const idx = MEMBERS.indexOf(member);
-  const emoji = idx >= 0 ? MEMBER_EMOJIS[idx] : '👤';
-  if (p?.photo) {
-    return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;${cls}"><img src="${p.photo}" alt="${member}" style="width:100%;height:100%;object-fit:cover;"></div>`;
+  const btn = document.getElementById('a-submit');
+  btn.disabled = true; btn.textContent = '업로드 중...';
+
+  try {
+    const urls = [];
+    for (const img of postImgs) urls.push(await uploadCld(img.file));
+
+    const likes = plat==='twitter'
+      ? Math.floor(Math.random()*4200)+800
+      : Math.floor(Math.random()*2700)+300;
+    const rt = plat==='twitter' ? Math.floor(likes*(0.1+Math.random()*0.28)) : 0;
+
+    await addDoc(collection(db,'posts'), {
+      platform: plat,
+      member: members[0],
+      members,
+      era: document.getElementById('a-era').value.trim(),
+      content: document.getElementById('a-content').value.trim(),
+      images: urls,
+      timestamp: new Date(document.getElementById('a-date').value||Date.now()),
+      likes, retweets: rt,
+      isSecret: plat==='weverse' && isSecret,
+      secretPassword: (plat==='weverse' && isSecret) ? document.getElementById('a-pw').value : '',
+    });
+
+    // reset
+    document.getElementById('a-content').value='';
+    document.getElementById('a-era').value='';
+    document.getElementById('a-pw').value='';
+    postImgs=[]; renderImgPrev();
+    document.querySelectorAll('#a-member-grid .m-chip').forEach(c=>c.classList.remove('on'));
+    isSecret=false;
+    document.getElementById('a-secret-tog').classList.remove('on');
+    document.getElementById('a-pw-row').style.display='none';
+    setNow();
+    toast('✅ 게시글 업로드 완료');
+  } catch(e) { toast('❌ 실패: '+e.message); }
+
+  btn.disabled=false; btn.textContent='게시하기';
+};
+
+// Story
+window.handleStoryImg = function(e) {
+  storyImgFile = e.target.files[0];
+  if (!storyImgFile) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('story-preview').innerHTML =
+      `<img src="${ev.target.result}" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;">`;
+  };
+  r.readAsDataURL(storyImgFile);
+};
+
+window.submitStory = async function() {
+  if (!storyMember) return toast('❌ 멤버를 선택해주세요');
+  if (!storyImgFile) return toast('❌ 이미지를 선택해주세요');
+  toast('업로드 중...');
+  try {
+    const url = await uploadCld(storyImgFile);
+    await addDoc(collection(db,'stories'),{member:storyMember,imageUrl:url,timestamp:new Date()});
+    storyImgFile=null; storyMember=null;
+    document.getElementById('story-preview').innerHTML='';
+    document.querySelectorAll('#a-story-grid .m-chip').forEach(c=>c.classList.remove('on'));
+    toast('✅ 스토리 업로드 완료');
+  } catch(e) { toast('❌ '+e.message); }
+};
+
+// ============================================================
+// EDIT / DELETE POST
+// ============================================================
+window.editPost = async function(id) {
+  ddClose();
+  const p = allPosts.find(x=>x.id===id); if (!p) return;
+  const nc = prompt('내용 수정:', p.content||'');
+  if (nc===null) return;
+  try { await updateDoc(doc(db,'posts',id),{content:nc}); toast('✅ 수정됨'); }
+  catch(e) { toast('❌ '+e.message); }
+};
+window.delPost = async function(id) {
+  ddClose();
+  if (!confirm('삭제할까요?')) return;
+  try { await deleteDoc(doc(db,'posts',id)); toast('✅ 삭제됨'); }
+  catch(e) { toast('❌ '+e.message); }
+};
+
+// ============================================================
+// DROPDOWN
+// ============================================================
+window.openDD = function(id, e) {
+  e.stopPropagation();
+  const dd = document.getElementById('dd-'+id);
+  const was = dd.classList.contains('open');
+  ddClose();
+  if (!was) {
+    dd.classList.add('open');
+    document.getElementById('dd-overlay').style.display='block';
   }
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:${size*0.4}px;font-weight:700;color:var(--text2);${cls}">${emoji}</div>`;
-}
+};
+window.ddClose = function() {
+  document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open'));
+  document.getElementById('dd-overlay').style.display='none';
+};
 
-function getHandle(member) {
-  return memberProfiles[member]?.handle || '@'+member.toLowerCase().replace(/\s/g,'');
-}
+// ============================================================
+// LIKES
+// ============================================================
+window.toggleLike = function(id, btn) {
+  const key='liked_'+id;
+  const liked = localStorage.getItem(key)==='1';
+  localStorage.setItem(key, liked?'0':'1');
+  const p = allPosts.find(x=>x.id===id); if (!p) return;
+  const disp = (p.likes||0) + (liked?0:1);
+  const el = document.getElementById('lc-'+id);
+  if (el) el.textContent = fmtN(disp);
+  btn.classList.toggle('liked', !liked);
+  btn.querySelector('svg').setAttribute('fill', liked?'none':'currentColor');
+};
 
-// ===========================
+// ============================================================
 // TWITTER RENDER
-// ===========================
+// ============================================================
 window.renderTwitter = function() {
   const feed = document.getElementById('tw-feed');
-  const posts = filterPosts('twitter');
-  
-  if (posts.length === 0) {
-    feed.innerHTML = '<div class="empty-state"><div class="icon">🐦</div><p>트윗이 없습니다</p></div>';
-    return;
-  }
-
-  feed.innerHTML = posts.map(p => renderTweet(p)).join('');
+  const posts = filtered('twitter');
+  if (!posts.length) { feed.innerHTML = '<div class="empty"><div class="ei">🐦</div><p>트윗이 없습니다</p></div>'; return; }
+  feed.innerHTML = posts.map(twCard).join('');
   initCarousels();
 };
 
-function renderTweet(p) {
-  const handle = getHandle(p.member);
-  const date = formatDate(p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp));
-  const images = p.images || [];
-  const likedKey = `liked_${p.id}`;
-  const isLiked = localStorage.getItem(likedKey) === '1';
-  const likes = (p.likes || 0) + (isLiked ? 1 : 0);
+function twCard(p) {
+  const handle = profiles[p.member]?.handle || ('@'+p.member.toLowerCase().replace(/\s/g,''));
+  const date = fmtDate(getDate(p.timestamp));
+  const imgs = p.images||[];
+  const liked = localStorage.getItem('liked_'+p.id)==='1';
+  const likes = (p.likes||0)+(liked?1:0);
 
   let imgHtml = '';
-  if (images.length === 1) {
-    imgHtml = `<div class="tweet-images tweet-imgs-1"><img src="${images[0]}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},0)"></div>`;
-  } else if (images.length === 2) {
-    imgHtml = `<div class="tweet-images tweet-imgs-2">${images.map((img,i) => `<img src="${img}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">`).join('')}</div>`;
-  } else if (images.length === 3) {
-    imgHtml = `<div class="tweet-images tweet-imgs-3">${images.map((img,i) => `<img src="${img}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">`).join('')}</div>`;
-  } else if (images.length >= 4) {
-    imgHtml = `<div class="tweet-images tweet-imgs-4">${images.slice(0,4).map((img,i) => `<img src="${img}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">`).join('')}</div>`;
-  }
+  if (imgs.length===1) imgHtml=`<div class="tw-imgs tw-img-1"><img src="${imgs[0]}" loading="lazy" onclick="openLb(${esc(imgs)},0)"></div>`;
+  else if (imgs.length===2) imgHtml=`<div class="tw-imgs tw-img-2">${imgs.map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
+  else if (imgs.length===3) imgHtml=`<div class="tw-imgs tw-img-3">${imgs.map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
+  else if (imgs.length>=4) imgHtml=`<div class="tw-imgs tw-img-4">${imgs.slice(0,4).map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
 
-  return `
-    <div class="tweet-card" data-id="${p.id}">
-      <div style="flex-shrink:0;">${getAvatar(p.member, 40)}</div>
-      <div class="tweet-body">
-        <div class="tweet-meta">
-          <span class="tweet-name">${p.member}</span>
-          <span class="tweet-handle">${handle}</span>
-          <span class="tweet-dot">·</span>
-          <span class="tweet-time">${date}</span>
-          ${p.era ? `<span class="tweet-era">${p.era}</span>` : ''}
-        </div>
-        <div class="tweet-text">${escapeHtml(p.content || '')}</div>
-        ${imgHtml}
-        <div class="tweet-actions">
-          <button class="tweet-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}','twitter',this)">
-            <svg viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-            <span id="likes-${p.id}">${formatNum(likes)}</span>
-          </button>
-          <button class="tweet-action-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
-            <span>${formatNum(p.retweets || 0)}</span>
-          </button>
-        </div>
+  return `<div class="tweet-card" data-id="${p.id}">
+    <div>${avatar(p.member,40)}</div>
+    <div class="tw-body">
+      <div class="tw-meta">
+        <span class="tw-name">${p.member}</span>
+        <span class="tw-handle">${handle}</span>
+        <span class="tw-dot">·</span>
+        <span class="tw-time">${date}</span>
+        ${p.era?`<span class="tw-era">${p.era}</span>`:''}
       </div>
-      <button class="tweet-more-btn" onclick="toggleDropdown('${p.id}','twitter',event)">···</button>
-      <div class="dropdown-menu" id="dropdown-${p.id}">
-        <div class="dropdown-item" onclick="editPost('${p.id}')">✏️ 수정</div>
-        <div class="dropdown-item danger" onclick="deletePost('${p.id}')">🗑️ 삭제</div>
+      <div class="tw-text">${xss(p.content||'')}</div>
+      ${imgHtml}
+      <div class="tw-actions">
+        <button class="tw-act-btn ${liked?'liked':''}" onclick="toggleLike('${p.id}',this)">
+          ${heartSvg(liked)}
+          <span id="lc-${p.id}">${fmtN(likes)}</span>
+        </button>
+        <button class="tw-act-btn">
+          ${rtSvg()}
+          <span>${fmtN(p.retweets||0)}</span>
+        </button>
       </div>
     </div>
-  `;
+    <button class="post-more-btn" onclick="openDD('${p.id}',event)">···</button>
+    <div class="dropdown" id="dd-${p.id}">
+      <div class="dd-item" onclick="editPost('${p.id}')">✏️ 수정</div>
+      <div class="dd-item red" onclick="delPost('${p.id}')">🗑️ 삭제</div>
+    </div>
+  </div>`;
 }
 
-// ===========================
+// ============================================================
 // WEVERSE RENDER
-// ===========================
+// ============================================================
 window.renderWeverse = function() {
   const feed = document.getElementById('wv-feed');
-  const posts = filterPosts('weverse');
-  
-  if (posts.length === 0) {
-    feed.innerHTML = '<div class="empty-state"><div class="icon">💜</div><p>게시글이 없습니다</p></div>';
-    return;
-  }
-
-  feed.innerHTML = posts.map(p => renderWeverseCard(p)).join('');
+  const posts = filtered('weverse');
+  if (!posts.length) { feed.innerHTML = '<div class="empty"><div class="ei">💜</div><p>게시글이 없습니다</p></div>'; return; }
+  feed.innerHTML = posts.map(wvCard).join('');
   initCarousels();
 };
 
-function renderWeverseCard(p) {
-  const date = formatDate(p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp));
-  const images = p.images || [];
-  const isLiked = localStorage.getItem(`liked_${p.id}`) === '1';
-  const likes = (p.likes || 0) + (isLiked ? 1 : 0);
-  const isUnlocked = unlockedSecrets.has(p.id);
-  const isSecret = p.isSecret;
+function wvCard(p) {
+  const date = fmtDate(getDate(p.timestamp));
+  const imgs = p.images||[];
+  const liked = localStorage.getItem('liked_'+p.id)==='1';
+  const likes = (p.likes||0)+(liked?1:0);
+  const unlocked = unlockedIds.has(p.id);
+  const secret = p.isSecret;
 
-  let imgHtml = '';
-  if (images.length > 0) {
-    const showCount = Math.min(images.length, 9);
-    const hasMore = images.length > 9;
-    if (showCount === 1) {
-      imgHtml = `<div class="wv-images"><div class="wv-img-grid-1"><img src="${images[0]}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},0)"></div></div>`;
-    } else if (showCount === 2) {
-      imgHtml = `<div class="wv-images"><div class="wv-img-grid-2">${images.slice(0,2).map((img,i)=>`<img src="${img}" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">`).join('')}</div></div>`;
-    } else if (showCount === 3) {
-      imgHtml = `<div class="wv-images"><div class="wv-img-grid-3">${images.slice(0,3).map((img,i)=>`<img src="${img}" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">`).join('')}</div></div>`;
-    } else {
-      const gridItems = images.slice(0, showCount).map((img, i) => {
-        if (hasMore && i === showCount - 1) {
-          return `<div class="wv-img-more" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})"><img src="${img}" loading="lazy" style="width:100%;height:120px;object-fit:cover;border-radius:10px;"><div class="wv-img-more-overlay">+${images.length - showCount + 1}</div></div>`;
-        }
-        return `<img src="${img}" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})" style="height:120px;object-fit:cover;border-radius:10px;">`;
+  let imgHtml='';
+  if (!secret||unlocked) {
+    if (imgs.length===1) imgHtml=`<div class="wv-imgs wv-img-1"><img src="${imgs[0]}" loading="lazy" onclick="openLb(${esc(imgs)},0)"></div>`;
+    else if (imgs.length===2) imgHtml=`<div class="wv-imgs wv-img-2">${imgs.map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
+    else if (imgs.length===3) imgHtml=`<div class="wv-imgs wv-img-3">${imgs.map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
+    else if (imgs.length>3) {
+      const show=Math.min(imgs.length,9); const more=imgs.length-show;
+      const cells=imgs.slice(0,show).map((u,i)=>{
+        if(more>0&&i===show-1) return `<div class="wv-img-more-wrap"><img src="${u}" class="wv-img-n" loading="lazy"><div class="wv-img-more-label" onclick="openLb(${esc(imgs)},${i})">+${more+1}</div></div>`;
+        return `<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})" style="height:110px;object-fit:cover;border-radius:10px;">`;
       }).join('');
-      imgHtml = `<div class="wv-images"><div class="wv-img-grid-n">${gridItems}</div></div>`;
+      imgHtml=`<div class="wv-imgs wv-img-n">${cells}</div>`;
     }
   }
 
-  const contentHtml = isSecret && !isUnlocked 
-    ? `
-      <div style="position:relative;min-height:80px;">
-        <div class="wv-card-text wv-secret-blur">${escapeHtml(p.content || '비밀포스트입니다. 비밀번호를 입력하여 내용을 확인하세요.')}</div>
-        <div class="wv-secret-overlay" onclick="openPwModal('${p.id}')">
-          <div style="font-size:32px;">🔒</div>
-          <button class="wv-secret-btn">비밀번호 입력</button>
-        </div>
-      </div>
-    `
-    : `<div class="wv-card-text">${escapeHtml(p.content || '')}</div>`;
+  const bodyHtml = secret&&!unlocked
+    ? `<div class="wv-secret-wrap"><div class="wv-card-text wv-secret-blur">${xss(p.content||'이 게시물은 비밀포스트입니다.')}</div><div class="wv-secret-overlay" onclick="pwOpen('${p.id}')"><div style="font-size:36px;">🔒</div><button class="wv-unlock-btn">🔓 비밀번호 입력</button></div></div>`
+    : `<div class="wv-card-text">${xss(p.content||'')}</div>`;
 
-  const translateContent = p.content ? generateFakeTranslation(p.content) : '';
-
-  return `
-    <div class="wv-card" data-id="${p.id}">
-      <div class="wv-card-header">
-        ${getAvatar(p.member, 42)}
-        <div class="wv-card-meta">
-          <div class="wv-card-name">${p.member}</div>
-          <div class="wv-card-time">${date}</div>
-        </div>
-        ${p.era ? `<span class="wv-era-badge">${p.era}</span>` : ''}
-        ${isSecret ? `<span class="wv-secret-badge">🔒 비밀</span>` : ''}
-        <button class="wv-more-btn" onclick="toggleDropdown('${p.id}','weverse',event)">···</button>
-        <div class="dropdown-menu" id="dropdown-${p.id}">
-          <div class="dropdown-item" onclick="editPost('${p.id}')">✏️ 수정</div>
-          <div class="dropdown-item danger" onclick="deletePost('${p.id}')">🗑️ 삭제</div>
-        </div>
+  return `<div class="wv-card" data-id="${p.id}">
+    <div class="wv-card-head">
+      ${avatar(p.member,42,'wv-av')}
+      <div class="wv-meta">
+        <div class="wv-name">${p.member}</div>
+        <div class="wv-time">${date}</div>
       </div>
-      <div class="wv-card-body">
-        ${contentHtml}
-      </div>
-      ${(!isSecret || isUnlocked) ? imgHtml : ''}
-      <div class="wv-card-footer">
-        <div class="wv-actions">
-          <button class="wv-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}','weverse',this)">
-            <svg viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-            <span id="likes-${p.id}">${formatNum(likes)}</span>
-          </button>
-        </div>
-        ${p.content ? `
-          <button class="wv-translate-btn" onclick="toggleTranslate('${p.id}',this)">번역 보기</button>
-          <div class="wv-translate-content" id="translate-${p.id}">${translateContent}</div>
-        ` : ''}
+      ${p.era?`<span class="wv-era-tag">${p.era}</span>`:''}
+      ${secret?`<span class="wv-secret-tag">🔒 비밀</span>`:''}
+      <button class="post-more-btn" style="position:relative;top:auto;right:auto;" onclick="openDD('${p.id}',event)">···</button>
+      <div class="dropdown" id="dd-${p.id}" style="right:0;top:32px;">
+        <div class="dd-item" onclick="editPost('${p.id}')">✏️ 수정</div>
+        <div class="dd-item red" onclick="delPost('${p.id}')">🗑️ 삭제</div>
       </div>
     </div>
-  `;
+    <div class="wv-card-body">${bodyHtml}</div>
+    ${imgHtml}
+    <div class="wv-card-foot">
+      <div class="wv-actions">
+        <button class="wv-act-btn ${liked?'liked':''}" onclick="toggleLike('${p.id}',this)">
+          ${heartSvg(liked)}
+          <span id="lc-${p.id}">${fmtN(likes)}</span>
+        </button>
+      </div>
+      ${p.content?`<button class="wv-translate-btn" onclick="wvTranslate('${p.id}',this)">번역 보기</button><div class="wv-translate-box" id="tr-${p.id}"><em style="color:var(--text3);font-size:11px;">🌐 번역 예시</em><br>${xss((p.content||'').slice(0,60))}...</div>`:''}
+    </div>
+  </div>`;
 }
 
-function generateFakeTranslation(text) {
-  return `<em style="color:var(--text3);font-size:12px;">🌐 번역 (예시)</em><br>${text.slice(0,50)}...`;
-}
-
-window.toggleTranslate = function(id, btn) {
-  const el = document.getElementById(`translate-${id}`);
-  const isOpen = el.classList.toggle('show');
-  btn.textContent = isOpen ? '번역 숨기기' : '번역 보기';
+window.wvTranslate = function(id, btn) {
+  const el = document.getElementById('tr-'+id);
+  const open = el.classList.toggle('show');
+  btn.textContent = open ? '번역 숨기기' : '번역 보기';
 };
 
-// ===========================
+// ============================================================
 // INSTAGRAM RENDER
-// ===========================
+// ============================================================
 window.renderInstagram = function() {
   const feed = document.getElementById('ig-feed');
-  const posts = filterPosts('instagram');
-  
-  if (posts.length === 0) {
-    feed.innerHTML = '<div class="empty-state"><div class="icon">📸</div><p>게시글이 없습니다</p></div>';
-    return;
-  }
-
-  feed.innerHTML = posts.map(p => renderIgPost(p)).join('');
+  const posts = filtered('instagram');
+  if (!posts.length) { feed.innerHTML = '<div class="empty"><div class="ei">📸</div><p>게시글이 없습니다</p></div>'; return; }
+  feed.innerHTML = posts.map(igCard).join('');
   initCarousels();
 };
 
-function renderIgPost(p) {
-  const date = formatDateShort(p.timestamp?.toDate ? p.timestamp.toDate() : new Date(p.timestamp));
-  const images = p.images || [];
-  const isLiked = localStorage.getItem(`liked_${p.id}`) === '1';
-  const likes = (p.likes || 0) + (isLiked ? 1 : 0);
+function igCard(p) {
+  const date = fmtDateShort(getDate(p.timestamp));
+  const imgs = p.images||[];
+  const liked = localStorage.getItem('liked_'+p.id)==='1';
+  const likes = (p.likes||0)+(liked?1:0);
+  const pr = profiles[p.member]||defaultProfile(p.member);
+  const carousel = imgs.length>1;
 
-  const isCarousel = images.length > 1;
-  const slides = images.map((img, i) => `
-    <div class="ig-carousel-slide">
-      <img src="${img}" alt="" loading="lazy" onclick="openLightbox(${JSON.stringify(images).replace(/"/g,'&quot;')},${i})">
+  const avInner = pr.photo
+    ? `<img src="${pr.photo}" alt="${p.member}">`
+    : `<span style="font-size:14px;font-weight:700;">${EMOJIS[MEMBERS.indexOf(p.member)]||'👤'}</span>`;
+
+  const slides = imgs.map((u,i)=>`<div class="ig-carousel-slide"><img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})"></div>`).join('');
+  const dots = carousel ? `<div class="ig-carousel-dots">${imgs.map((_,i)=>`<div class="ig-dot${i===0?' active':''}"></div>`).join('')}</div>` : '';
+  const prevBtn = carousel ? `<button class="ig-carr-btn prev" onclick="igPrev(this)">‹</button>` : '';
+  const nextBtn = carousel ? `<button class="ig-carr-btn next" onclick="igNext(this)">›</button>` : '';
+  const multiIcon = carousel ? `<div class="ig-multi-icon">⧉</div>` : '';
+
+  return `<div class="ig-card" data-id="${p.id}">
+    <div class="ig-card-head">
+      <div class="ig-card-av"><div class="ig-card-av-inner">${avInner}</div></div>
+      <div>
+        <div class="ig-card-name">${p.member}</div>
+        <div class="ig-card-sub">${p.era||''}${p.era&&date?' · ':''}${date}</div>
+      </div>
+      <button class="post-more-btn" style="position:relative;top:auto;right:auto;margin-left:auto;" onclick="openDD('${p.id}',event)">···</button>
+      <div class="dropdown" id="dd-${p.id}" style="right:0;top:32px;">
+        <div class="dd-item" onclick="editPost('${p.id}')">✏️ 수정</div>
+        <div class="dd-item red" onclick="delPost('${p.id}')">🗑️ 삭제</div>
+      </div>
     </div>
-  `).join('');
-
-  const dots = isCarousel ? `<div class="ig-carousel-dots">${images.map((_,i) => `<div class="ig-carousel-dot ${i===0?'active':''}" data-idx="${i}"></div>`).join('')}</div>` : '';
-  const prevBtn = isCarousel ? `<button class="ig-carousel-btn prev" onclick="igCarouselPrev(this)">‹</button>` : '';
-  const nextBtn = isCarousel ? `<button class="ig-carousel-btn next" onclick="igCarouselNext(this)">›</button>` : '';
-  const multiIcon = isCarousel ? `<div class="ig-carousel-multi-icon">⧉</div>` : '';
-
-  const p2 = memberProfiles[p.member];
-  const avatarInner = p2?.photo 
-    ? `<img src="${p2.photo}" alt="${p.member}">`
-    : `<span style="font-size:14px;font-weight:700;color:var(--text2);">${MEMBER_EMOJIS[MEMBERS.indexOf(p.member)]||'👤'}</span>`;
-
-  return `
-    <div class="ig-post-card" data-id="${p.id}">
-      <div class="ig-post-header">
-        <div class="ig-post-avatar">
-          <div class="ig-post-avatar-inner">${avatarInner}</div>
-        </div>
-        <div class="ig-post-meta">
-          <div class="ig-post-name">${p.member}</div>
-          <div class="ig-post-sub">${p.era || ''}${p.era && date ? ' · ' : ''}${date}</div>
-        </div>
-        <button class="ig-more-btn" onclick="toggleDropdown('${p.id}','instagram',event)">···</button>
-        <div class="dropdown-menu" id="dropdown-${p.id}">
-          <div class="dropdown-item" onclick="editPost('${p.id}')">✏️ 수정</div>
-          <div class="dropdown-item danger" onclick="deletePost('${p.id}')">🗑️ 삭제</div>
-        </div>
-      </div>
-      <div class="ig-carousel" data-index="0">
-        <div class="ig-carousel-track" style="width:${images.length*100}%">
-          ${slides}
-        </div>
-        ${dots}${prevBtn}${nextBtn}${multiIcon}
-      </div>
-      <div class="ig-post-actions">
-        <button class="ig-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}','instagram',this)">
-          <svg viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        </button>
-        <button class="ig-action-btn ig-bookmark" style="margin-left:auto;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-        </button>
-      </div>
-      <div class="ig-post-likes">좋아요 <span id="likes-${p.id}">${formatNum(likes)}</span>개</div>
-      ${p.content ? `<div class="ig-post-caption"><span class="name">${p.member}</span> ${escapeHtml(p.content)}</div>` : ''}
-      <div class="ig-post-date">${date.toUpperCase ? date.toUpperCase() : date}</div>
+    <div class="ig-carousel" data-idx="0">
+      <div class="ig-carousel-track" style="width:${imgs.length*100}%">${slides}</div>
+      ${dots}${prevBtn}${nextBtn}${multiIcon}
     </div>
-  `;
+    <div class="ig-actions">
+      <button class="ig-act-btn ${liked?'liked':''}" onclick="toggleLike('${p.id}',this)">
+        ${heartSvg(liked,24)}
+      </button>
+      <button class="ig-act-btn ig-bookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></button>
+    </div>
+    <div class="ig-likes">좋아요 <span id="lc-${p.id}">${fmtN(likes)}</span>개</div>
+    ${p.content?`<div class="ig-caption"><span class="n">${p.member}</span> ${xss(p.content)}</div>`:''}
+    <div class="ig-date">${date.toUpperCase ? date.toUpperCase() : date}</div>
+  </div>`;
 }
 
-// ===========================
+// ============================================================
 // STORIES
-// ===========================
-function renderStoriesBar() {
-  const bar = document.getElementById('ig-stories-bar');
+// ============================================================
+function renderStories() {
+  const bar = document.getElementById('ig-stories-row');
   if (!bar) return;
-  
-  // Group by member, keep latest per member
-  const memberLatest = {};
+  const byMember = {};
   MEMBERS.forEach(m => {
-    const mStories = allStories.filter(s => s.member === m);
-    if (mStories.length > 0) memberLatest[m] = mStories;
+    const ms = allStories.filter(s=>s.member===m);
+    if (ms.length) byMember[m]=ms;
   });
-
-  if (Object.keys(memberLatest).length === 0) {
-    bar.innerHTML = '<div style="padding:10px 0;color:var(--text3);font-size:13px;">스토리가 없습니다</div>';
+  if (!Object.keys(byMember).length) {
+    bar.innerHTML='<div style="padding:8px 0;color:var(--text3);font-size:13px;">스토리가 없습니다</div>';
     return;
   }
-
-  bar.innerHTML = Object.entries(memberLatest).map(([member, stories]) => {
-    const p = memberProfiles[member];
-    const avatarContent = p?.photo 
-      ? `<img src="${p.photo}" alt="${member}">` 
-      : `<span style="font-size:20px;font-weight:700;">${MEMBER_EMOJIS[MEMBERS.indexOf(member)]||'👤'}</span>`;
-    
-    return `
-      <div class="ig-story-item" onclick="openStory('${member}')">
-        <div class="ig-story-ring">
-          <div class="ig-story-avatar">${avatarContent}</div>
-        </div>
-        <div class="ig-story-name">${member}</div>
-      </div>
-    `;
+  bar.innerHTML = Object.entries(byMember).map(([m,ss]) => {
+    const pr = profiles[m]||defaultProfile(m);
+    const inner = pr.photo ? `<img src="${pr.photo}" alt="${m}">` : EMOJIS[MEMBERS.indexOf(m)]||'👤';
+    return `<div class="ig-story-item" onclick="svOpen('${m}')">
+      <div class="ig-story-ring"><div class="ig-story-inner">${inner}</div></div>
+      <div class="ig-story-name">${m}</div>
+    </div>`;
   }).join('');
 }
 
-window.openStory = function(member) {
-  currentStories = allStories.filter(s => s.member === member);
-  if (currentStories.length === 0) return;
-  svIndex = 0;
-  showStory(0);
-  document.getElementById('story-viewer').classList.add('open');
+window.svOpen = function(m) {
+  svList = allStories.filter(s=>s.member===m);
+  if (!svList.length) return;
+  svIdx=0; svShow();
+  document.getElementById('sv').classList.add('open');
 };
 
-function showStory(idx) {
-  if (idx < 0 || idx >= currentStories.length) {
-    closeStoryViewer();
-    return;
-  }
-  svIndex = idx;
-  const story = currentStories[idx];
-  const p = memberProfiles[story.member];
-  const date = formatDate(story.timestamp?.toDate ? story.timestamp.toDate() : new Date(story.timestamp));
-
-  document.getElementById('sv-img').src = story.imageUrl;
-  document.getElementById('sv-name').textContent = story.member;
-  document.getElementById('sv-time').textContent = date;
-  
-  const avatarEl = document.getElementById('sv-avatar-img');
-  avatarEl.src = p?.photo || '';
-  avatarEl.style.display = p?.photo ? 'block' : 'none';
-
-  // Progress
-  if (svTimer) clearInterval(svTimer);
-  const bar = document.getElementById('sv-progress-bar');
-  bar.style.width = '0%';
-  let progress = 0;
-  svTimer = setInterval(() => {
-    progress += 0.5;
-    bar.style.width = progress + '%';
-    if (progress >= 100) {
-      clearInterval(svTimer);
-      svNext();
-    }
-  }, 25);
+function svShow() {
+  const s=svList[svIdx];
+  document.getElementById('sv-img').src=s.imageUrl;
+  document.getElementById('sv-uname').textContent=s.member;
+  document.getElementById('sv-utime').textContent=fmtDate(getDate(s.timestamp));
+  const pr=profiles[s.member]||defaultProfile(s.member);
+  const av=document.getElementById('sv-av');
+  av.src=pr.photo||''; av.style.display=pr.photo?'block':'none';
+  if(svTimer) clearInterval(svTimer);
+  const bar=document.getElementById('sv-bar');
+  bar.style.width='0%'; let prog=0;
+  svTimer=setInterval(()=>{ prog+=0.5; bar.style.width=prog+'%'; if(prog>=100){clearInterval(svTimer);svMove(1);} },25);
 }
 
-window.svNext = function() {
-  if (svIndex + 1 < currentStories.length) showStory(svIndex + 1);
-  else closeStoryViewer();
+window.svMove = function(d) {
+  const ni=svIdx+d;
+  if(ni<0||ni>=svList.length){svClose();return;}
+  svIdx=ni; svShow();
+};
+window.svClose = function() {
+  if(svTimer) clearInterval(svTimer);
+  document.getElementById('sv').classList.remove('open');
 };
 
-window.svPrev = function() {
-  if (svIndex > 0) showStory(svIndex - 1);
-};
-
-window.closeStoryViewer = function() {
-  if (svTimer) clearInterval(svTimer);
-  document.getElementById('story-viewer').classList.remove('open');
-};
-
-// ===========================
-// CAROUSELS
-// ===========================
+// ============================================================
+// CAROUSEL (Instagram)
+// ============================================================
 function initCarousels() {
-  document.querySelectorAll('.ig-carousel').forEach(carousel => {
-    let startX = 0;
-    const track = carousel.querySelector('.ig-carousel-track');
-    if (!track) return;
-
-    carousel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
-    carousel.addEventListener('touchend', e => {
-      const diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) igCarouselNext(carousel.querySelector('.ig-carousel-btn.next'));
-        else igCarouselPrev(carousel.querySelector('.ig-carousel-btn.prev'));
-      }
-    }, {passive:true});
+  document.querySelectorAll('.ig-carousel').forEach(c => {
+    let sx=0;
+    c.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+    c.addEventListener('touchend',e=>{
+      const dx=sx-e.changedTouches[0].clientX;
+      if(Math.abs(dx)>40) dx>0?igNext(c.querySelector('.ig-carr-btn.next')):igPrev(c.querySelector('.ig-carr-btn.prev'));
+    },{passive:true});
   });
 }
 
-window.igCarouselNext = function(btn) {
-  if (!btn) return;
-  const carousel = btn.closest('.ig-carousel');
-  const idx = parseInt(carousel.dataset.index || '0');
-  const track = carousel.querySelector('.ig-carousel-track');
-  const slides = carousel.querySelectorAll('.ig-carousel-slide');
-  const newIdx = Math.min(idx + 1, slides.length - 1);
-  carousel.dataset.index = newIdx;
-  track.style.transform = `translateX(-${newIdx * (100/slides.length)}%)`;
-  updateDots(carousel, newIdx);
+window.igNext = function(btn) {
+  if(!btn) return;
+  const c=btn.closest('.ig-carousel');
+  const track=c.querySelector('.ig-carousel-track');
+  const slides=c.querySelectorAll('.ig-carousel-slide');
+  const idx=Math.min(parseInt(c.dataset.idx||0)+1,slides.length-1);
+  c.dataset.idx=idx;
+  track.style.transform=`translateX(-${idx*(100/slides.length)}%)`;
+  c.querySelectorAll('.ig-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+};
+window.igPrev = function(btn) {
+  if(!btn) return;
+  const c=btn.closest('.ig-carousel');
+  const track=c.querySelector('.ig-carousel-track');
+  const slides=c.querySelectorAll('.ig-carousel-slide');
+  const idx=Math.max(parseInt(c.dataset.idx||0)-1,0);
+  c.dataset.idx=idx;
+  track.style.transform=`translateX(-${idx*(100/slides.length)}%)`;
+  c.querySelectorAll('.ig-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 };
 
-window.igCarouselPrev = function(btn) {
-  if (!btn) return;
-  const carousel = btn.closest('.ig-carousel');
-  const idx = parseInt(carousel.dataset.index || '0');
-  const track = carousel.querySelector('.ig-carousel-track');
-  const slides = carousel.querySelectorAll('.ig-carousel-slide');
-  const newIdx = Math.max(idx - 1, 0);
-  carousel.dataset.index = newIdx;
-  track.style.transform = `translateX(-${newIdx * (100/slides.length)}%)`;
-  updateDots(carousel, newIdx);
-};
-
-function updateDots(carousel, idx) {
-  carousel.querySelectorAll('.ig-carousel-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === idx);
-  });
-}
-
-// ===========================
+// ============================================================
 // LIGHTBOX
-// ===========================
-window.openLightbox = function(images, startIdx) {
-  if (!images || images.length === 0) return;
-  lbImages = images;
-  lbIndex = startIdx || 0;
-  
-  const track = document.getElementById('lb-track');
-  track.innerHTML = images.map(img => `
-    <div class="lb-img-slide">
-      <img src="${img}" alt="" loading="lazy">
-    </div>
-  `).join('');
-  track.style.width = `${images.length * 100}vw`;
-  
-  updateLightbox();
+// ============================================================
+window.openLb = function(imgs, start) {
+  if(!imgs||!imgs.length) return;
+  lbImgs=imgs; lbIdx=start||0;
+  const track=document.getElementById('lb-track');
+  track.innerHTML=imgs.map(u=>`<div class="lb-slide"><img src="${u}" loading="lazy"></div>`).join('');
+  track.style.width=`${imgs.length*100}vw`;
+  lbUpdate();
   document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 
-  // Touch events
-  const lb = document.getElementById('lightbox');
-  lb.addEventListener('touchstart', lbTouchStart, {passive:true});
-  lb.addEventListener('touchend', lbTouchEnd, {passive:true});
+  const lb=document.getElementById('lightbox');
+  lb._ts=e=>{lbTouchX=e.touches[0].clientX;};
+  lb._te=e=>{const d=lbTouchX-e.changedTouches[0].clientX; if(Math.abs(d)>45) lbMove(d>0?1:-1);};
+  lb.addEventListener('touchstart',lb._ts,{passive:true});
+  lb.addEventListener('touchend',lb._te,{passive:true});
 };
 
-function lbTouchStart(e) { lbStartX = e.touches[0].clientX; }
-function lbTouchEnd(e) {
-  const diff = lbStartX - e.changedTouches[0].clientX;
-  if (Math.abs(diff) > 50) {
-    if (diff > 0) lbNext();
-    else lbPrev();
-  }
+function lbUpdate() {
+  document.getElementById('lb-track').style.transform=`translateX(-${lbIdx*100}vw)`;
+  document.getElementById('lb-cnt').textContent=lbImgs.length>1?`${lbIdx+1} / ${lbImgs.length}`:'';
+  document.getElementById('lb-prev').style.display=lbImgs.length>1&&lbIdx>0?'flex':'none';
+  document.getElementById('lb-next').style.display=lbImgs.length>1&&lbIdx<lbImgs.length-1?'flex':'none';
 }
 
-function updateLightbox() {
-  const track = document.getElementById('lb-track');
-  track.style.transform = `translateX(-${lbIndex * 100}vw)`;
-  
-  const counter = document.getElementById('lb-counter');
-  counter.textContent = lbImages.length > 1 ? `${lbIndex+1} / ${lbImages.length}` : '';
-  
-  document.getElementById('lb-prev').style.display = lbImages.length > 1 && lbIndex > 0 ? 'flex' : 'none';
-  document.getElementById('lb-next').style.display = lbImages.length > 1 && lbIndex < lbImages.length-1 ? 'flex' : 'none';
-}
-
-window.lbNext = function() {
-  if (lbIndex < lbImages.length - 1) { lbIndex++; updateLightbox(); }
-};
-window.lbPrev = function() {
-  if (lbIndex > 0) { lbIndex--; updateLightbox(); }
-};
-window.closeLightbox = function() {
+window.lbMove = function(d) { lbIdx=Math.max(0,Math.min(lbImgs.length-1,lbIdx+d)); lbUpdate(); };
+window.closeLb = function() {
   document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-  const lb = document.getElementById('lightbox');
-  lb.removeEventListener('touchstart', lbTouchStart);
-  lb.removeEventListener('touchend', lbTouchEnd);
+  document.body.style.overflow='';
+  const lb=document.getElementById('lightbox');
+  if(lb._ts) lb.removeEventListener('touchstart',lb._ts);
+  if(lb._te) lb.removeEventListener('touchend',lb._te);
+};
+document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===this)closeLb();});
+
+// ============================================================
+// PASSWORD
+// ============================================================
+window.pwOpen = function(id) {
+  pendingPwId=id;
+  document.getElementById('pw-inp').value='';
+  document.getElementById('pw-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pw-inp').focus(),150);
+};
+window.pwClose = function() { document.getElementById('pw-modal').classList.remove('open'); pendingPwId=null; };
+window.pwConfirm = function() {
+  const inp=document.getElementById('pw-inp').value;
+  const p=allPosts.find(x=>x.id===pendingPwId); if(!p) return pwClose();
+  if(inp===p.secretPassword) {
+    unlockedIds.add(pendingPwId); pwClose(); renderWeverse(); toast('✅ 비밀포스트 열림!');
+  } else {
+    document.getElementById('pw-inp').style.borderColor='#e74c3c';
+    toast('❌ 비밀번호 틀림');
+    setTimeout(()=>{document.getElementById('pw-inp').style.borderColor='';},1500);
+  }
 };
 
-// Close lightbox on bg click
-document.getElementById('lightbox').addEventListener('click', function(e) {
-  if (e.target === this) closeLightbox();
+// ============================================================
+// TOAST
+// ============================================================
+window.toast = function(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+};
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeLb();svClose();pwClose();ddClose();}
+  if(document.getElementById('lightbox').classList.contains('open')){
+    if(e.key==='ArrowRight') lbMove(1);
+    if(e.key==='ArrowLeft') lbMove(-1);
+  }
 });
 
-// ===========================
-// LIKES
-// ===========================
-window.toggleLike = function(id, platform, btn) {
-  const key = `liked_${id}`;
-  const isLiked = localStorage.getItem(key) === '1';
-  const newLiked = !isLiked;
-  localStorage.setItem(key, newLiked ? '1' : '0');
+// ============================================================
+// HELPERS
+// ============================================================
+function mk(tag,cls){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
 
-  const post = allPosts.find(p => p.id === id);
-  if (!post) return;
-  
-  const baseLikes = post.likes || 0;
-  const display = baseLikes + (newLiked ? 1 : 0);
-  
-  const likesEl = document.getElementById(`likes-${id}`);
-  if (likesEl) likesEl.textContent = formatNum(display);
-  
-  if (platform === 'twitter') {
-    btn.classList.toggle('liked', newLiked);
-    btn.querySelector('svg').setAttribute('fill', newLiked ? 'currentColor' : 'none');
-  } else if (platform === 'weverse') {
-    btn.classList.toggle('liked', newLiked);
-    btn.querySelector('svg').setAttribute('fill', newLiked ? 'currentColor' : 'none');
-  } else {
-    btn.classList.toggle('liked', newLiked);
-    btn.querySelector('svg').setAttribute('fill', newLiked ? 'currentColor' : 'none');
-  }
-};
+function avatar(member,size,extraCls='tw-av') {
+  const p=profiles[member]; const i=MEMBERS.indexOf(member);
+  const emoji=EMOJIS[i]||'👤';
+  if(p?.photo) return `<div class="${extraCls}" style="width:${size}px;height:${size}px;"><img src="${p.photo}" alt="${member}"></div>`;
+  return `<div class="${extraCls}" style="width:${size}px;height:${size}px;font-size:${size*.4}px;">${emoji}</div>`;
+}
 
-// ===========================
-// DROPDOWN
-// ===========================
-window.toggleDropdown = function(id, platform, e) {
-  e.stopPropagation();
-  const dd = document.getElementById(`dropdown-${id}`);
-  const wasOpen = dd.classList.contains('open');
-  closeAllDropdowns();
-  if (!wasOpen) {
-    dd.classList.add('open');
-    currentDropdownId = id;
-    document.getElementById('dropdown-overlay').style.display = 'block';
-  }
-};
+function getDate(ts) {
+  if(!ts) return new Date();
+  if(ts.toDate) return ts.toDate();
+  if(ts instanceof Date) return ts;
+  return new Date(ts);
+}
 
-window.closeAllDropdowns = function() {
-  document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
-  document.getElementById('dropdown-overlay').style.display = 'none';
-  currentDropdownId = null;
-};
+function fmtDate(d) {
+  const s=(Date.now()-d)/1000;
+  if(s<60) return '방금';
+  if(s<3600) return `${Math.floor(s/60)}분 전`;
+  if(s<86400) return `${Math.floor(s/3600)}시간 전`;
+  if(s<604800) return `${Math.floor(s/86400)}일 전`;
+  return d.toLocaleDateString('ko-KR',{month:'long',day:'numeric',year:'numeric'});
+}
 
-// ===========================
-// EDIT / DELETE POST
-// ===========================
-window.editPost = async function(id) {
-  closeAllDropdowns();
-  const post = allPosts.find(p => p.id === id);
-  if (!post) return;
+function fmtDateShort(d) {
+  return d.toLocaleDateString('ko-KR',{month:'short',day:'numeric'});
+}
 
-  const newContent = prompt('게시글 내용 수정:', post.content || '');
-  if (newContent === null) return;
-
-  try {
-    await updateDoc(doc(db, 'posts', id), { content: newContent });
-    showToast('✅ 게시글이 수정되었습니다');
-  } catch(e) {
-    showToast('❌ 수정 실패: '+e.message);
-  }
-};
-
-window.deletePost = async function(id) {
-  closeAllDropdowns();
-  if (!confirm('이 게시글을 삭제하시겠습니까?')) return;
-  try {
-    await deleteDoc(doc(db, 'posts', id));
-    showToast('✅ 게시글이 삭제되었습니다');
-  } catch(e) {
-    showToast('❌ 삭제 실패: '+e.message);
-  }
-};
-
-// ===========================
-// PASSWORD MODAL
-// ===========================
-window.openPwModal = function(id) {
-  pendingSecretId = id;
-  document.getElementById('pw-input').value = '';
-  document.getElementById('pw-modal').classList.add('open');
-  setTimeout(() => document.getElementById('pw-input').focus(), 100);
-};
-
-window.closePwModal = function() {
-  document.getElementById('pw-modal').classList.remove('open');
-  pendingSecretId = null;
-};
-
-window.confirmPw = function() {
-  const input = document.getElementById('pw-input').value;
-  const post = allPosts.find(p => p.id === pendingSecretId);
-  if (!post) return closePwModal();
-  
-  if (input === post.secretPassword) {
-    unlockedSecrets.add(pendingSecretId);
-    closePwModal();
-    renderWeverse();
-    showToast('✅ 비밀포스트가 열렸습니다');
-  } else {
-    document.getElementById('pw-input').style.borderColor = '#e74c3c';
-    showToast('❌ 비밀번호가 틀렸습니다');
-    setTimeout(() => { document.getElementById('pw-input').style.borderColor = ''; }, 1500);
-  }
-};
-
-// ===========================
-// TOAST
-// ===========================
-window.showToast = function(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-};
-
-// ===========================
-// UTILS
-// ===========================
-function formatNum(n) {
-  if (n >= 1000) return (n/1000).toFixed(1).replace('.0','') + 'K';
+function fmtN(n) {
+  if(n>=1000) return (n/1000).toFixed(1).replace('.0','')+'K';
   return String(n);
 }
 
-function escapeHtml(text) {
-  return text
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+function xss(t) {
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
 }
 
-// Keyboard shortcuts
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeLightbox();
-    closeStoryViewer();
-    closePwModal();
-    closeAllDropdowns();
-  }
-  if (document.getElementById('lightbox').classList.contains('open')) {
-    if (e.key === 'ArrowRight') lbNext();
-    if (e.key === 'ArrowLeft') lbPrev();
-  }
-});
+function esc(arr) {
+  return JSON.stringify(arr).replace(/"/g,'&quot;');
+}
+
+function heartSvg(filled, size=17) {
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+}
+
+function rtSvg() {
+  return `<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`;
+}
 </script>
 </body>
 </html>
