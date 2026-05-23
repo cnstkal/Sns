@@ -1,131 +1,909 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SNS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Archive SNS</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome (Icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel (JSX 컴파일) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Firebase (Compat 버전 사용) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { 
+      font-family: 'Pretendard', sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
     }
-
-    body{
-      font-family:'Pretendard',sans-serif;
-      background:#0a0a0a;
-      color:white;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-
-    .bg{
-      position:fixed;
-      inset:0;
-      background:
-      radial-gradient(circle at top left,#3b1d74 0%,transparent 35%),
-      radial-gradient(circle at bottom right,#0ea5e9 0%,transparent 30%),
-      #0a0a0a;
-      filter:blur(20px);
-      opacity:.9;
-    }
-
-    .card{
-      position:relative;
-      width:min(92vw,420px);
-      padding:38px 26px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:30px;
-      backdrop-filter:blur(18px);
-      background:rgba(255,255,255,.05);
-      box-shadow:0 10px 40px rgba(0,0,0,.45);
-      text-align:center;
-      z-index:1;
-    }
-
-    .profile{
-      width:92px;
-      height:92px;
-      border-radius:50%;
-      margin:0 auto 18px;
-      background:linear-gradient(135deg,#ffffff,#777);
-    }
-
-    h1{
-      font-size:32px;
-      font-weight:700;
-      letter-spacing:-1px;
-      margin-bottom:8px;
-    }
-
-    p{
-      color:rgba(255,255,255,.65);
-      font-size:14px;
-      line-height:1.6;
-      margin-bottom:28px;
-    }
-
-    .links{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .btn{
-      height:54px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.06);
-      color:white;
-      text-decoration:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:15px;
-      font-weight:600;
-      transition:.2s ease;
-    }
-
-    .btn:hover{
-      transform:translateY(-2px);
-      background:rgba(255,255,255,.12);
-    }
-
-    .footer{
-      margin-top:24px;
-      font-size:12px;
-      color:rgba(255,255,255,.35);
-    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    body { overscroll-behavior-y: none; }
   </style>
 </head>
 <body>
-  <div class="bg"></div>
+  <div id="root"></div>
 
-  <div class="card">
-    <div class="profile"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
 
-    <h1>SNS</h1>
-    <p>
-      simple social archive<br>
-      minimal ui concept
-    </p>
+    // ==========================================
+    // ⚙️ 설정 영역
+    // ==========================================
+    const CLOUDINARY_CLOUD_NAME = 'dbljkloal';
+    const CLOUDINARY_UPLOAD_PRESET = 'clowofficial';
 
-    <div class="links">
-      <a href="#" class="btn">Instagram</a>
-      <a href="#" class="btn">Twitter</a>
-      <a href="#" class="btn">YouTube</a>
-      <a href="#" class="btn">TikTok</a>
-    </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAA6mbdYfLrrgCJjN47PX91_mU7I53RiBs",
+      authDomain: "site-c67b4.firebaseapp.com",
+      projectId: "site-c67b4",
+      storageBucket: "site-c67b4.firebasestorage.app",
+      messagingSenderId: "744761377245",
+      appId: "1:744761377245:web:3ddaee14f184716eeef634"
+    };
 
-    <div class="footer">
-      made by cnstkal
-    </div>
-  </div>
+    const appId = 'archive-sns-app'; // 데이터 독립 경로를 위한 ID
+
+    // Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const MEMBERS = ['션린위', '해인', '로아', '남해주', '로은', '서도윤', '루이', '범지유'];
+    const PLATFORMS = { TWITTER: 'twitter', WEVERSE: 'weverse', INSTAGRAM: 'instagram', ADMIN: 'admin' };
+
+    // ==========================================
+    // 🎨 유틸리티 함수
+    // ==========================================
+    const uploadToCloudinary = async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+          method: 'POST', body: formData,
+        });
+        const data = await res.json();
+        return data.secure_url;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        return null;
+      }
+    };
+
+    const formatDate = (dateString) => {
+      const d = new Date(dateString);
+      return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    };
+
+    const getRandomCount = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // ==========================================
+    // 🔔 커스텀 모달 컴포넌트
+    // ==========================================
+    function CustomDialog({ config, onClose, theme }) {
+      const [inputValue, setInputValue] = useState('');
+      
+      if (!config) return null;
+
+      const handleConfirm = () => {
+        if (config.type === 'prompt') {
+          if (config.onConfirm) config.onConfirm(inputValue);
+        } else {
+          if (config.onConfirm) config.onConfirm();
+        }
+        onClose();
+      };
+
+      const handleCancel = () => {
+        if (config.onCancel) config.onCancel();
+        else onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className={`w-full max-w-sm rounded-2xl p-6 shadow-2xl ${theme === 'dark' ? 'bg-[#16181c] text-white' : 'bg-white text-black'}`}>
+            <p className="text-[15px] font-bold mb-5 leading-relaxed">{config.message}</p>
+            {config.type === 'prompt' && (
+              <input type="password" value={inputValue} onChange={e => setInputValue(e.target.value)}
+                     className={`w-full p-3 rounded-xl border outline-none mb-4 transition focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'bg-[#202327] border-gray-700' : 'bg-gray-50 border-gray-300'}`} />
+            )}
+            <div className="flex justify-end gap-2 mt-2">
+              {config.type !== 'alert' && (
+                <button onClick={handleCancel} className={`px-4 py-2.5 rounded-xl text-sm font-bold transition ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}>취소</button>
+              )}
+              <button onClick={handleConfirm} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition">확인</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // ⚛️ 메인 App 컴포넌트
+    // ==========================================
+    function App() {
+      const [user, setUser] = useState(null);
+      const [theme, setTheme] = useState('dark');
+      const [currentTab, setCurrentTab] = useState(PLATFORMS.TWITTER);
+      
+      // Data
+      const [posts, setPosts] = useState([]);
+      const [stories, setStories] = useState([]);
+      const [profiles, setProfiles] = useState({});
+      
+      // UI State
+      const [selectedMembers, setSelectedMembers] = useState([]);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [viewerData, setViewerData] = useState(null);
+      const [editingPost, setEditingPost] = useState(null);
+      const [dialogConfig, setDialogConfig] = useState(null); // 커스텀 모달 설정
+
+      const dialogs = {
+        alert: (msg) => setDialogConfig({ type: 'alert', message: msg }),
+        confirm: (msg, onConfirm) => setDialogConfig({ type: 'confirm', message: msg, onConfirm }),
+        prompt: (msg, onConfirm) => setDialogConfig({ type: 'prompt', message: msg, onConfirm })
+      };
+
+      useEffect(() => {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+        if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      }, []);
+
+      const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+        if (newTheme === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      };
+
+      // Firebase Auth & Data
+      useEffect(() => {
+        auth.signInAnonymously().catch(console.error);
+        const unsubscribeAuth = auth.onAuthStateChanged(setUser);
+        return () => unsubscribeAuth();
+      }, []);
+
+      useEffect(() => {
+        if (!user) return;
+        
+        const postsRef = db.collection(`artifacts/${appId}/public/data/posts`);
+        const storiesRef = db.collection(`artifacts/${appId}/public/data/stories`);
+        const profilesRef = db.collection(`artifacts/${appId}/public/data/profiles`);
+
+        const unsubPosts = postsRef.onSnapshot((snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          data.sort((a, b) => new Date(b.date) - new Date(a.date));
+          setPosts(data);
+        });
+
+        const unsubStories = storiesRef.onSnapshot((snapshot) => {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          data.sort((a, b) => new Date(b.date) - new Date(a.date));
+          setStories(data);
+        });
+
+        const unsubProfiles = profilesRef.onSnapshot((snapshot) => {
+          const data = {};
+          snapshot.docs.forEach(doc => { data[doc.id] = doc.data(); });
+          setProfiles(data);
+        });
+
+        return () => { unsubPosts(); unsubStories(); unsubProfiles(); };
+      }, [user]);
+
+      const filteredPosts = useMemo(() => {
+        return posts.filter(post => {
+          const matchPlatform = post.platform === currentTab;
+          const matchMember = selectedMembers.length === 0 || selectedMembers.includes(post.member);
+          const searchLower = searchQuery.toLowerCase();
+          const matchSearch = searchQuery === '' || 
+                              (post.text || '').toLowerCase().includes(searchLower) ||
+                              (post.member || '').toLowerCase().includes(searchLower) ||
+                              (post.era || '').toLowerCase().includes(searchLower);
+          return matchPlatform && matchMember && matchSearch;
+        });
+      }, [posts, currentTab, selectedMembers, searchQuery]);
+
+      const handleLike = async (postId, currentLikes) => {
+        if (!user) return;
+        await db.doc(`artifacts/${appId}/public/data/posts/${postId}`).update({ likes: (currentLikes || 0) + 1 });
+      };
+
+      const handleDelete = (postId) => {
+        dialogs.confirm("이 게시글을 삭제하시겠습니까?", async () => {
+          await db.doc(`artifacts/${appId}/public/data/posts/${postId}`).delete();
+        });
+      };
+
+      return (
+        <div className={`min-h-screen w-full max-w-[100vw] overflow-x-hidden transition-colors duration-200 ${
+          theme === 'dark' ? 'bg-[#000000] text-white' : 'bg-[#ffffff] text-black'
+        }`} style={{ touchAction: 'pan-y' }}>
+
+          {/* 헤더 */}
+          {currentTab !== PLATFORMS.ADMIN && (
+            <header className={`sticky top-0 z-40 backdrop-blur-xl border-b ${
+              theme === 'dark' ? 'bg-black/85 border-gray-800' : 'bg-white/85 border-gray-200'
+            }`}>
+              <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+                <h1 className="text-xl font-bold tracking-tight">
+                  {currentTab === 'twitter' && 'Home'}
+                  {currentTab === 'weverse' && 'Feed'}
+                  {currentTab === 'instagram' && 'Instagram'}
+                </h1>
+                <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition">
+                  {theme === 'dark' ? '🌙' : '☀️'}
+                </button>
+              </div>
+              
+              <div className="max-w-3xl mx-auto px-4 pb-2 overflow-x-auto hide-scrollbar flex gap-2">
+                <button onClick={() => setSelectedMembers([])} className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                    selectedMembers.length === 0 ? (theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white') : (theme === 'dark' ? 'bg-[#16181c] text-gray-400' : 'bg-gray-100 text-gray-600')
+                  }`}>All</button>
+                {MEMBERS.map(member => (
+                  <button key={member} onClick={() => setSelectedMembers(prev => prev.includes(member) ? prev.filter(m => m !== member) : [...prev, member])}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition ${
+                      selectedMembers.includes(member) ? (theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white') : (theme === 'dark' ? 'bg-[#16181c] text-gray-400 border border-gray-800' : 'bg-white text-gray-600 border border-gray-300')
+                    }`}>{member}</button>
+                ))}
+              </div>
+
+              <div className="max-w-3xl mx-auto px-4 pb-3">
+                <div className={`flex items-center px-3 py-2 rounded-xl ${theme === 'dark' ? 'bg-[#202327] text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                  <i className="fa-solid fa-search opacity-50 mr-2"></i>
+                  <input type="text" placeholder="검색 (내용, 멤버, 태그...)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent border-none outline-none w-full text-sm placeholder-gray-500" />
+                </div>
+              </div>
+            </header>
+          )}
+
+          {/* 메인 뷰 */}
+          <main className="max-w-3xl mx-auto pb-20 min-h-[100vh]">
+            {currentTab === PLATFORMS.TWITTER && <TwitterView posts={filteredPosts} profiles={profiles} onLike={handleLike} theme={theme} openViewer={setViewerData} onEdit={setEditingPost} onDelete={handleDelete} />}
+            {currentTab === PLATFORMS.WEVERSE && <WeverseView posts={filteredPosts} profiles={profiles} onLike={handleLike} theme={theme} openViewer={setViewerData} onEdit={setEditingPost} onDelete={handleDelete} dialogs={dialogs} />}
+            {currentTab === PLATFORMS.INSTAGRAM && <InstagramView posts={filteredPosts} stories={stories} profiles={profiles} onLike={handleLike} selectedMembers={selectedMembers} theme={theme} openViewer={setViewerData} onEdit={setEditingPost} onDelete={handleDelete} />}
+            {currentTab === PLATFORMS.ADMIN && <AdminView profiles={profiles} theme={theme} dialogs={dialogs} user={user} db={db} />}
+          </main>
+
+          {/* 하단 탭 바 */}
+          <nav className={`fixed bottom-0 w-full border-t z-40 pb-safe ${
+            theme === 'dark' ? 'bg-black border-gray-800' : 'bg-white border-gray-200'
+          }`}>
+            <div className="max-w-3xl mx-auto flex justify-around items-center h-14">
+              <NavItem icon={<i className="fa-brands fa-twitter text-lg"></i>} label="Twitter" active={currentTab === PLATFORMS.TWITTER} onClick={() => setCurrentTab(PLATFORMS.TWITTER)} />
+              <NavItem icon={<i className="fa-solid fa-w text-lg"></i>} label="Weverse" active={currentTab === PLATFORMS.WEVERSE} onClick={() => setCurrentTab(PLATFORMS.WEVERSE)} />
+              <NavItem icon={<i className="fa-brands fa-instagram text-lg"></i>} label="Instagram" active={currentTab === PLATFORMS.INSTAGRAM} onClick={() => setCurrentTab(PLATFORMS.INSTAGRAM)} />
+              <NavItem icon={<i className="fa-solid fa-gear text-lg"></i>} label="Admin" active={currentTab === PLATFORMS.ADMIN} onClick={() => setCurrentTab(PLATFORMS.ADMIN)} />
+            </div>
+          </nav>
+
+          {viewerData && <ImageViewer data={viewerData} onClose={() => setViewerData(null)} />}
+          {editingPost && <EditModal post={editingPost} onClose={() => setEditingPost(null)} theme={theme} db={db} dialogs={dialogs} />}
+          <CustomDialog config={dialogConfig} onClose={() => setDialogConfig(null)} theme={theme} />
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 📝 드롭다운 메뉴 컴포넌트
+    // ==========================================
+    function PostMenu({ post, onEdit, onDelete, theme }) {
+      const [open, setOpen] = useState(false);
+      const menuRef = useRef(null);
+
+      useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+      }, []);
+
+      return (
+        <div className="relative" ref={menuRef}>
+          <button onClick={(e) => { e.stopPropagation(); setOpen(!open); }} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <i className="fa-solid fa-ellipsis"></i>
+          </button>
+          {open && (
+            <div className={`absolute right-0 top-8 mt-1 w-36 rounded-xl shadow-lg border z-50 overflow-hidden ${
+              theme === 'dark' ? 'bg-[#16181c] border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+              <button onClick={() => { onEdit(post); setOpen(false); }} className={`w-full flex items-center gap-2 px-4 py-3 text-sm font-medium transition ${theme === 'dark' ? 'hover:bg-gray-800 text-white' : 'hover:bg-gray-100 text-black'}`}>
+                <i className="fa-solid fa-pen"></i> 수정
+              </button>
+              <button onClick={() => { onDelete(post.id); setOpen(false); }} className={`w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-red-500 transition ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+                <i className="fa-solid fa-trash"></i> 삭제
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 🐦 Twitter 뷰
+    // ==========================================
+    function TwitterView({ posts, profiles, onLike, theme, openViewer, onEdit, onDelete }) {
+      return (
+        <div className={`flex flex-col ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+          {posts.length === 0 && <div className="p-8 text-center text-gray-500">게시물이 없습니다.</div>}
+          {posts.map(post => {
+            const profile = profiles[post.member] || {};
+            const images = post.images?.slice(0, 4) || [];
+            
+            let gridClass = 'grid-cols-1';
+            if (images.length === 2) gridClass = 'grid-cols-2 aspect-[8/4]';
+            else if (images.length === 3) gridClass = 'grid-cols-2 aspect-[8/4]';
+            else if (images.length === 4) gridClass = 'grid-cols-2 aspect-square';
+
+            return (
+              <article key={post.id} className={`p-4 border-b transition hover:bg-black/5 dark:hover:bg-white/5 ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-100'
+              }`}>
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                    {profile.pic ? <img src={profile.pic} alt={post.member} className="w-full h-full object-cover" /> : <i className="fa-solid fa-user text-gray-500"></i>}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="font-bold truncate hover:underline cursor-pointer">{profile.name || post.member}</span>
+                        {profile.id && <i className="fa-solid fa-circle-check text-[#1d9bf0] bg-white rounded-full text-sm"></i>}
+                        <span className={`text-[15px] truncate ${theme === 'dark' ? 'text-[#71767b]' : 'text-[#536471]'}`}>@{profile.id || 'userid'}</span>
+                        <span className={`text-[15px] ${theme === 'dark' ? 'text-[#71767b]' : 'text-[#536471]'}`}>·</span>
+                        <span className={`text-[15px] hover:underline cursor-pointer ${theme === 'dark' ? 'text-[#71767b]' : 'text-[#536471]'}`}>{post.date?.substring(5,10)}</span>
+                      </div>
+                      <PostMenu post={post} onEdit={onEdit} onDelete={onDelete} theme={theme} />
+                    </div>
+                    
+                    <p className="whitespace-pre-wrap text-[15px] leading-snug mb-3">{post.text}</p>
+                    {post.era && <p className="text-[#1d9bf0] text-[15px] mb-3 hover:underline cursor-pointer">#{post.era}</p>}
+
+                    {images.length > 0 && (
+                      <div className={`grid gap-0.5 mb-3 rounded-2xl overflow-hidden border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} ${gridClass}`}>
+                        {images.map((img, idx) => (
+                          <div key={idx} onClick={() => openViewer({ images: post.images, initialIndex: idx })}
+                               className={`relative bg-gray-200 cursor-pointer overflow-hidden ${images.length === 3 && idx === 0 ? 'row-span-2' : ''}`}>
+                            <img src={img} alt="tweet media" className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={`flex justify-between items-center max-w-md text-[13px] ${theme === 'dark' ? 'text-[#71767b]' : 'text-[#536471]'}`}>
+                      <button className="flex items-center gap-1 hover:text-[#1d9bf0] transition group"><div className="p-2 rounded-full group-hover:bg-[#1d9bf0]/10"><i className="fa-regular fa-comment text-base"></i></div> {Math.floor(post.likes * 0.1) || 12}</button>
+                      <button className="flex items-center gap-1 hover:text-[#00ba7c] transition group"><div className="p-2 rounded-full group-hover:bg-[#00ba7c]/10"><i className="fa-solid fa-retweet text-base"></i></div> {post.retweets || 0}</button>
+                      <button onClick={(e) => { e.stopPropagation(); onLike(post.id, post.likes); }} className={`flex items-center gap-1 hover:text-[#f91880] transition group ${post.likes > 0 ? 'text-[#f91880]' : ''}`}>
+                        <div className="p-2 rounded-full group-hover:bg-[#f91880]/10"><i className={`fa-heart text-base ${post.likes > 0 ? 'fa-solid fill-[#f91880]' : 'fa-regular'}`}></i></div> {post.likes || 0}
+                      </button>
+                      <button className="flex items-center gap-1 hover:text-[#1d9bf0] transition group"><div className="p-2 rounded-full group-hover:bg-[#1d9bf0]/10"><i className="fa-solid fa-arrow-up-from-bracket text-base"></i></div></button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 🟩 Weverse 뷰
+    // ==========================================
+    function WeverseView({ posts, profiles, onLike, theme, openViewer, onEdit, onDelete, dialogs }) {
+      const [unlockedPosts, setUnlockedPosts] = useState({});
+      const [translated, setTranslated] = useState({});
+
+      const handleUnlock = (postId, correctPassword) => {
+        dialogs.prompt("비밀번호를 입력하세요.", (input) => {
+          if (input === correctPassword) setUnlockedPosts(prev => ({ ...prev, [postId]: true }));
+          else if (input) dialogs.alert("비밀번호가 틀렸습니다.");
+        });
+      };
+
+      const toggleTranslate = (postId) => {
+        setTranslated(prev => ({ ...prev, [postId]: !prev[postId] }));
+      };
+
+      return (
+        <div className={`min-h-screen py-4 px-2 sm:px-4 ${theme === 'dark' ? 'bg-[#101012]' : 'bg-[#f2f4f6]'}`}>
+          <div className="flex flex-col gap-4">
+            {posts.map(post => {
+              const profile = profiles[post.member] || {};
+              const isLocked = post.isSecret && !unlockedPosts[post.id];
+              const isTranslated = translated[post.id];
+              const displayImages = post.images || [];
+              const previewImages = displayImages.slice(0, 9);
+              const hasMoreImages = displayImages.length > 9;
+
+              return (
+                <article key={post.id} className={`rounded-2xl shadow-sm overflow-hidden ${theme === 'dark' ? 'bg-[#1c1c1e] text-gray-200' : 'bg-white text-gray-800'}`}>
+                  <div className="px-4 py-3 flex justify-between items-center border-b border-transparent">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#31e097] to-[#04c2e3] p-[2px]">
+                        <div className="w-full h-full rounded-full border-2 border-transparent overflow-hidden bg-white flex items-center justify-center">
+                          {profile.pic ? <img src={profile.pic} alt={post.member} className="w-full h-full object-cover" /> : <i className="fa-solid fa-user text-gray-500"></i>}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-[15px]">{profile.name || post.member}</span>
+                          <span className="text-[10px] bg-[#04c2e3] text-white px-1.5 py-0.5 rounded-sm font-bold">ARTIST</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{formatDate(post.date)}</span>
+                      </div>
+                    </div>
+                    <PostMenu post={post} onEdit={onEdit} onDelete={onDelete} theme={theme} />
+                  </div>
+
+                  <div className="relative">
+                    {isLocked ? (
+                      <div className="px-4 py-16 bg-gray-100 dark:bg-[#2c2c2e] flex flex-col items-center justify-center cursor-pointer" onClick={() => handleUnlock(post.id, post.password)}>
+                        <i className="fa-solid fa-lock text-3xl text-gray-400 mb-3"></i>
+                        <p className="font-bold text-gray-500 text-sm mb-1">비밀 포스트입니다.</p>
+                        <p className="text-xs text-gray-400">탭하여 잠금 해제</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="px-4 pb-2 pt-1">
+                          <p className="whitespace-pre-wrap text-[15px] leading-relaxed mb-3">
+                            {isTranslated ? `[번역됨]\n${post.text}` : post.text}
+                          </p>
+                          <button onClick={() => toggleTranslate(post.id)} className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium hover:text-gray-700 dark:hover:text-gray-300 transition bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                            <i className="fa-solid fa-globe"></i> {isTranslated ? '원문 보기' : 'A/文 번역 보기'}
+                          </button>
+                          {post.era && <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-[#2c2c2e] text-xs rounded-md text-gray-500 mb-2">#{post.era}</span>}
+                        </div>
+                        
+                        {displayImages.length > 0 && (
+                          <div className={`grid gap-1 px-4 pb-4 ${
+                            displayImages.length === 1 ? 'grid-cols-1' :
+                            displayImages.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+                          }`}>
+                            {previewImages.map((img, idx) => {
+                              const isLastPreview = idx === 8 && hasMoreImages;
+                              return (
+                                <div key={idx} onClick={() => openViewer({ images: displayImages, initialIndex: idx })}
+                                     className={`relative bg-gray-200 cursor-pointer overflow-hidden ${displayImages.length === 1 ? 'aspect-[4/5] rounded-xl' : 'aspect-square rounded-md'}`}>
+                                  <img src={img} alt="weverse media" className="absolute inset-0 w-full h-full object-cover" />
+                                  {isLastPreview && (
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-xl">
+                                      +{displayImages.length - 9}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <div className={`px-4 py-3 flex items-center justify-between border-t ${theme === 'dark' ? 'border-[#2c2c2e]' : 'border-gray-100'}`}>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => onLike(post.id, post.likes)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition ${
+                        theme === 'dark' ? 'border-gray-700 hover:bg-[#2c2c2e]' : 'border-gray-200 hover:bg-gray-50'
+                      }`}>
+                        <i className={`fa-heart ${post.likes > 0 ? "fa-solid text-[#ff4d4d]" : "fa-regular text-gray-500"}`}></i>
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300">{post.likes || 0}</span>
+                      </button>
+                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition ${
+                        theme === 'dark' ? 'border-gray-700 hover:bg-[#2c2c2e]' : 'border-gray-200 hover:bg-gray-50'
+                      }`}>
+                        <i className="fa-regular fa-comment text-gray-500"></i>
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-300">응원하기</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 📸 Instagram 뷰
+    // ==========================================
+    function InstagramView({ posts, stories, profiles, onLike, selectedMembers, theme, openViewer, onEdit, onDelete }) {
+      const filteredStories = useMemo(() => {
+        const latestStories = {};
+        stories.forEach(s => {
+          if (!latestStories[s.member] || new Date(s.date) > new Date(latestStories[s.member].date)) {
+            latestStories[s.member] = s;
+          }
+        });
+        const storyList = Object.values(latestStories).sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (selectedMembers.length === 0) return storyList;
+        return storyList.filter(s => selectedMembers.includes(s.member));
+      }, [stories, selectedMembers]);
+
+      return (
+        <div className={`pb-8 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+          <div className={`flex overflow-x-auto gap-4 px-4 py-4 hide-scrollbar border-b ${theme === 'dark' ? 'border-[#262626]' : 'border-gray-200'}`}>
+            {filteredStories.map(story => {
+              const profile = profiles[story.member] || {};
+              return (
+                <div key={story.id} className="flex flex-col items-center gap-1 cursor-pointer flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-[3px] bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600">
+                    <div className={`w-full h-full rounded-full border-2 overflow-hidden ${theme === 'dark' ? 'border-black' : 'border-white'}`}>
+                      {profile.pic ? <img src={profile.pic} alt={story.member} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-300"></div>}
+                    </div>
+                  </div>
+                  <span className="text-[11px] sm:text-xs truncate w-16 sm:w-20 text-center">{profile.id || story.member}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col max-w-[470px] mx-auto mt-4 gap-6">
+            {posts.map(post => {
+              const profile = profiles[post.member] || {};
+              const images = post.images?.slice(0, 10) || [];
+              return (
+                <article key={post.id} className={`border-b pb-4 ${theme === 'dark' ? 'border-[#262626]' : 'border-gray-200'}`}>
+                  <div className="flex items-center justify-between px-2 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 cursor-pointer flex items-center justify-center">
+                        {profile.pic ? <img src={profile.pic} alt={post.member} className="w-full h-full object-cover" /> : <i className="fa-solid fa-user text-gray-500 text-xs"></i>}
+                      </div>
+                      <span className="font-semibold text-[14px] leading-tight hover:text-gray-500 cursor-pointer">{profile.id || post.member}</span>
+                    </div>
+                    <PostMenu post={post} onEdit={onEdit} onDelete={onDelete} theme={theme} />
+                  </div>
+
+                  {images.length > 0 ? (
+                    <div className="relative w-full bg-gray-100 dark:bg-[#121212] flex overflow-x-auto snap-x snap-mandatory hide-scrollbar rounded-sm items-center">
+                      {images.map((img, idx) => (
+                        <img key={idx} src={img} alt="post" onClick={() => openViewer({ images, initialIndex: idx })}
+                             className="w-full flex-shrink-0 snap-center object-cover aspect-[4/5] cursor-pointer" />
+                      ))}
+                      {images.length > 1 && <i className="fa-regular fa-clone absolute top-3 right-3 text-white drop-shadow-lg text-lg opacity-90"></i>}
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm">이미지가 없습니다.</div>
+                  )}
+
+                  <div className="px-2 pt-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex gap-4">
+                        <button onClick={() => onLike(post.id, post.likes)}><i className={`fa-heart text-[26px] hover:opacity-50 transition ${post.likes > 0 ? "fa-solid text-red-500" : "fa-regular"}`}></i></button>
+                        <button><i className="fa-regular fa-comment text-[26px] hover:opacity-50 transition"></i></button>
+                        <button><i className="fa-regular fa-paper-plane text-[26px] hover:opacity-50 transition"></i></button>
+                      </div>
+                      <button><i className="fa-regular fa-bookmark text-[26px] hover:opacity-50 transition"></i></button>
+                    </div>
+                    
+                    <p className="font-semibold text-sm mb-1">좋아요 {post.likes || 0}개</p>
+                    <div className="text-[14px] leading-snug">
+                      <span className="font-semibold mr-2">{profile.id || post.member}</span>
+                      <span className="whitespace-pre-wrap">{post.text}</span>
+                    </div>
+                    {post.era && <p className="text-[#00376b] dark:text-[#e0f1ff] text-sm mt-1 cursor-pointer">#{post.era}</p>}
+                    <p className="text-[11px] text-gray-500 uppercase mt-2 tracking-wide">{post.date?.substring(0, 10).replace(/-/g, ' ')}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 🖼️ 라이트박스 뷰어
+    // ==========================================
+    function ImageViewer({ data, onClose }) {
+      const { images, initialIndex } = data;
+      const [currentIndex, setCurrentIndex] = useState(initialIndex || 0);
+      const [touchStart, setTouchStart] = useState(0);
+
+      const prevImage = (e) => { e?.stopPropagation(); setCurrentIndex(prev => Math.max(0, prev - 1)); };
+      const nextImage = (e) => { e?.stopPropagation(); setCurrentIndex(prev => Math.min(images.length - 1, prev + 1)); };
+
+      const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+      const handleTouchEnd = (e) => {
+        const touchEnd = e.changedTouches[0].clientX;
+        if (touchStart - touchEnd > 50) nextImage();
+        if (touchEnd - touchStart > 50) prevImage();
+      };
+
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.key === 'ArrowRight') nextImage();
+          if (e.key === 'ArrowLeft') prevImage();
+          if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [currentIndex, images.length]);
+
+      return (
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center touch-none" onClick={onClose}>
+          <button className="absolute top-4 right-4 text-white p-3 z-50 bg-black/20 rounded-full" onClick={onClose}><i className="fa-solid fa-xmark text-xl"></i></button>
+          
+          {images.length > 1 && (
+            <div className="absolute top-6 text-white text-sm bg-black/50 px-3 py-1 rounded-full z-50">
+              {currentIndex + 1} / {images.length}
+            </div>
+          )}
+
+          <div className="w-full h-full flex items-center justify-center relative overflow-hidden" 
+               onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+            {currentIndex > 0 && <button onClick={prevImage} className="absolute left-4 p-4 text-white hidden md:block bg-black/20 hover:bg-black/50 rounded-full transition"><i className="fa-solid fa-chevron-left text-2xl"></i></button>}
+            
+            <img src={images[currentIndex]} alt="fullscreen" className="max-w-full max-h-full object-contain select-none pointer-events-none" />
+            
+            {currentIndex < images.length - 1 && <button onClick={nextImage} className="absolute right-4 p-4 text-white hidden md:block bg-black/20 hover:bg-black/50 rounded-full transition"><i className="fa-solid fa-chevron-right text-2xl"></i></button>}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // ✏️ 게시물 수정 모달
+    // ==========================================
+    function EditModal({ post, onClose, theme, db, dialogs }) {
+      const [text, setText] = useState(post.text);
+      const [era, setEra] = useState(post.era || '');
+      const [loading, setLoading] = useState(false);
+
+      const handleUpdate = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+          await db.doc(`artifacts/${appId}/public/data/posts/${post.id}`).update({ text, era });
+          onClose();
+        } catch (err) {
+          console.error(err);
+          dialogs.alert("수정 실패");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className={`w-full max-w-md rounded-2xl p-6 shadow-xl ${theme === 'dark' ? 'bg-[#16181c] text-white' : 'bg-white text-black'}`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">게시글 수정</h3>
+              <button onClick={onClose}><i className="fa-solid fa-xmark text-gray-500 text-xl"></i></button>
+            </div>
+            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+              <textarea rows="5" value={text} onChange={e => setText(e.target.value)} 
+                className={`w-full p-3 rounded-xl border outline-none resize-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'bg-[#202327] border-gray-700' : 'bg-gray-50 border-gray-300'}`} />
+              <input type="text" value={era} onChange={e => setEra(e.target.value)} placeholder="#era 태그"
+                className={`w-full p-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'bg-[#202327] border-gray-700' : 'bg-gray-50 border-gray-300'}`} />
+              <button type="submit" disabled={loading} className="w-full py-3 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
+                {loading ? '저장 중...' : '완료'}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 🛠️ Admin 뷰
+    // ==========================================
+    function AdminView({ profiles, theme, dialogs, user, db }) {
+      const [formType, setFormType] = useState('post');
+      const [uploading, setUploading] = useState(false);
+
+      const [platform, setPlatform] = useState(PLATFORMS.TWITTER);
+      const [member, setMember] = useState(MEMBERS[0]);
+      const [date, setDate] = useState(new Date().toISOString().slice(0, 16));
+      const [text, setText] = useState('');
+      const [era, setEra] = useState('');
+      const [isSecret, setIsSecret] = useState(false);
+      const [password, setPassword] = useState('');
+      const [files, setFiles] = useState([]);
+      
+      const [profileId, setProfileId] = useState('');
+      const [profileName, setProfileName] = useState('');
+      const [profileBio, setProfileBio] = useState('');
+
+      const handleFileChange = (e) => {
+        const selected = Array.from(e.target.files);
+        if (platform === PLATFORMS.TWITTER && selected.length > 4) {
+          return dialogs.alert("트위터는 최대 4장까지만 업로드 가능합니다.");
+        }
+        if (platform === PLATFORMS.INSTAGRAM && selected.length > 10) {
+          return dialogs.alert("인스타그램은 최대 10장까지만 업로드 가능합니다.");
+        }
+        setFiles(selected);
+      };
+
+      const handleSubmitPost = async (e) => {
+        e.preventDefault();
+        if (!user) return dialogs.alert("인증 오류.");
+        if (platform === PLATFORMS.INSTAGRAM && files.length === 0) return dialogs.alert("인스타그램은 반드시 이미지가 포함되어야 합니다.");
+        
+        setUploading(true);
+        try {
+          const uploadedImageUrls = [];
+          for (const file of files) {
+            const url = await uploadToCloudinary(file);
+            if (url) uploadedImageUrls.push(url);
+          }
+
+          let likes = 0, retweets = 0;
+          if (platform === PLATFORMS.TWITTER) {
+            likes = getRandomCount(800, 5000);
+            retweets = getRandomCount(100, likes - 100);
+          } else if (platform === PLATFORMS.WEVERSE) {
+            likes = getRandomCount(300, 3000);
+          } else {
+            likes = getRandomCount(500, 4000);
+          }
+
+          const postData = {
+            platform, member, date: new Date(date).toISOString(), text, era,
+            images: uploadedImageUrls, likes, retweets
+          };
+
+          if (platform === PLATFORMS.WEVERSE) {
+            postData.isSecret = isSecret;
+            if (isSecret) postData.password = password;
+          }
+
+          await db.collection(`artifacts/${appId}/public/data/posts`).add(postData);
+          
+          dialogs.alert("게시물이 성공적으로 업로드되었습니다.");
+          setText(''); setFiles([]); setIsSecret(false); setPassword(''); setEra('');
+        } catch (err) { console.error(err); dialogs.alert("오류 발생"); } 
+        finally { setUploading(false); }
+      };
+
+      const handleSubmitStory = async (e) => {
+        e.preventDefault();
+        if (!user) return;
+        if (files.length === 0) return dialogs.alert("스토리 이미지를 선택하세요.");
+        setUploading(true);
+        try {
+          const url = await uploadToCloudinary(files[0]);
+          if (url) {
+            await db.collection(`artifacts/${appId}/public/data/stories`).add({ member, image: url, date: new Date().toISOString() });
+            dialogs.alert("스토리가 업로드되었습니다."); setFiles([]);
+          }
+        } catch (err) { console.error(err); dialogs.alert("업로드 실패"); } finally { setUploading(false); }
+      };
+
+      const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        if (!user) return;
+        setUploading(true);
+        try {
+          let picUrl = profiles[member]?.pic || '';
+          if (files.length > 0) {
+            const url = await uploadToCloudinary(files[0]);
+            if (url) picUrl = url;
+          }
+          await db.doc(`artifacts/${appId}/public/data/profiles/${member}`).set({
+            member, id: profileId, name: profileName, bio: profileBio, pic: picUrl
+          }, { merge: true });
+          dialogs.alert("프로필이 업데이트되었습니다."); setFiles([]);
+        } catch (err) { console.error(err); dialogs.alert("업데이트 실패"); } finally { setUploading(false); }
+      };
+
+      useEffect(() => {
+        if (formType === 'profile') {
+          const p = profiles[member];
+          setProfileId(p?.id || ''); setProfileName(p?.name || ''); setProfileBio(p?.bio || '');
+        }
+      }, [member, formType, profiles]);
+
+      const inputClass = `w-full p-3 rounded-xl border outline-none transition focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'bg-[#1a1a1a] border-gray-800 text-white' : 'bg-white border-gray-300 text-black'}`;
+
+      return (
+        <div className={`p-4 sm:p-8 min-h-screen ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-gray-50'}`}>
+          <h2 className="text-2xl font-bold mb-6">Administrator</h2>
+          <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-2">
+            {['post', 'story', 'profile'].map(type => (
+              <button key={type} onClick={() => setFormType(type)} className={`px-5 py-2 rounded-full font-bold capitalize transition ${formType === type ? (theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white') : (theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600')}`}>{type}</button>
+            ))}
+          </div>
+          <div className={`p-6 rounded-2xl shadow-sm ${theme === 'dark' ? 'bg-[#111111]' : 'bg-white'}`}>
+            {formType === 'post' && (
+              <form onSubmit={handleSubmitPost} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2">플랫폼</label>
+                  <select value={platform} onChange={e => { setPlatform(e.target.value); setFiles([]); }} className={inputClass}>
+                    <option value={PLATFORMS.TWITTER}>Twitter (최대 4장)</option>
+                    <option value={PLATFORMS.WEVERSE}>Weverse (제한없음)</option>
+                    <option value={PLATFORMS.INSTAGRAM}>Instagram (최대 10장 필수)</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold mb-2">멤버</label>
+                    <select value={member} onChange={e => setMember(e.target.value)} className={inputClass}>
+                      {MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div><label className="block text-sm font-bold mb-2">업로드 날짜</label><input type="datetime-local" value={date} onChange={e => setDate(e.target.value)} className={inputClass} /></div>
+                </div>
+                <div><label className="block text-sm font-bold mb-2">본문 내용</label><textarea rows="4" value={text} onChange={e => setText(e.target.value)} className={inputClass} /></div>
+                <div>
+                  <label className="block text-sm font-bold mb-2">이미지</label>
+                  <input type="file" multiple accept="image/*" onChange={handleFileChange} className={inputClass} />
+                  {files.length > 0 && <p className="text-sm mt-2 text-green-500 font-bold">{files.length}개의 파일 선택됨</p>}
+                </div>
+                <div><label className="block text-sm font-bold mb-2">Era 태그</label><input type="text" value={era} onChange={e => setEra(e.target.value)} className={inputClass} placeholder="태그를 입력하세요" /></div>
+                {platform === PLATFORMS.WEVERSE && (
+                  <div className="p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 mt-2">
+                    <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                      <input type="checkbox" checked={isSecret} onChange={e => setIsSecret(e.target.checked)} className="w-4 h-4 accent-blue-500" />
+                      <span className="font-bold text-blue-500">비밀 포스트로 설정</span>
+                    </label>
+                    {isSecret && <input type="password" value={password} onChange={e => setPassword(e.target.value)} className={inputClass} placeholder="비밀번호 설정" required />}
+                  </div>
+                )}
+                <button type="submit" disabled={uploading} className="mt-4 w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">{uploading ? '업로드 중...' : '게시물 업로드'}</button>
+              </form>
+            )}
+            {formType === 'story' && (
+              <form onSubmit={handleSubmitStory} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-bold mb-2">멤버</label>
+                  <select value={member} onChange={e => setMember(e.target.value)} className={inputClass}>
+                    {MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div><label className="block text-sm font-bold mb-2">스토리 이미지 (1장)</label><input type="file" accept="image/*" onChange={handleFileChange} className={inputClass} /></div>
+                <button type="submit" disabled={uploading} className="mt-4 w-full py-4 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl transition">{uploading ? '업로드 중...' : '스토리 업로드'}</button>
+              </form>
+            )}
+            {formType === 'profile' && (
+              <form onSubmit={handleUpdateProfile} className="flex flex-col gap-4">
+                 <div><label className="block text-sm font-bold mb-2">수정할 멤버</label><select value={member} onChange={e => setMember(e.target.value)} className={inputClass}>{MEMBERS.map(m => <option key={m} value={m}>{m}</option>)}</select></div>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden border flex items-center justify-center">{profiles[member]?.pic ? <img src={profiles[member].pic} alt="current" className="w-full h-full object-cover"/> : <i className="fa-solid fa-user text-gray-400"></i>}</div>
+                  <div className="flex-1"><label className="block text-sm font-bold mb-2">새 프로필 사진 (선택)</label><input type="file" accept="image/*" onChange={handleFileChange} className={inputClass} /></div>
+                </div>
+                <div><label className="block text-sm font-bold mb-2">표시 이름</label><input type="text" value={profileName} onChange={e => setProfileName(e.target.value)} className={inputClass} /></div>
+                <div><label className="block text-sm font-bold mb-2">아이디 (ID)</label><input type="text" value={profileId} onChange={e => setProfileId(e.target.value)} className={inputClass} /></div>
+                <div><label className="block text-sm font-bold mb-2">소개글</label><textarea rows="2" value={profileBio} onChange={e => setProfileBio(e.target.value)} className={inputClass} /></div>
+                <button type="submit" disabled={uploading} className="mt-4 w-full py-4 bg-gray-800 hover:bg-black text-white font-bold rounded-xl transition">{uploading ? '저장 중...' : '프로필 저장'}</button>
+              </form>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function NavItem({ icon, label, active, onClick }) {
+      return (
+        <button onClick={onClick} className={`flex flex-col items-center justify-center w-full h-full gap-1 transition ${active ? 'text-blue-500' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+          {icon}<span className="text-[10px] font-bold">{label}</span>
+        </button>
+      );
+    }
+
+    // 렌더링
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
