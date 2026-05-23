@@ -1,1205 +1,817 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SNS Archive</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    html,
-    body {
-      width: 100%;
-      overflow-x: hidden;
-      overscroll-behavior: none;
-      touch-action: pan-y;
-      font-family: 'Pretendard', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background .25s ease, color .25s ease;
-    }
-
-    img {
-      pointer-events: none;
-    }
-
-    body.light {
-      --bg: #f5f6f8;
-      --card: #ffffff;
-      --soft: #f0f2f5;
-      --border: #e2e4e8;
-      --text: #111111;
-      --sub: #6d6d6d;
-    }
-
-    body.dark {
-      --bg: #000000;
-      --card: #16181c;
-      --soft: #1d1f23;
-      --border: #27292e;
-      --text: #f8f8f8;
-      --sub: #8f949d;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .hidden-scroll::-webkit-scrollbar {
-      display: none;
-    }
-
-    .app-shell {
-      max-width: 720px;
-      margin: 0 auto;
-      min-height: 100vh;
-      position: relative;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 300;
-      backdrop-filter: blur(18px);
-      background: rgba(0,0,0,.68);
-      border-bottom: 1px solid var(--border);
-    }
-
-    body.light .topbar {
-      background: rgba(255,255,255,.85);
-    }
-
-    .platform-tabs {
-      display: flex;
-      gap: 8px;
-      padding: 14px;
-      overflow-x: auto;
-    }
-
-    .platform-btn {
-      border: 1px solid var(--border);
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      background: var(--card);
-      white-space: nowrap;
-      transition: .2s;
-    }
-
-    .platform-btn.active {
-      background: white;
-      color: black;
-      font-weight: 700;
-    }
-
-    body.light .platform-btn.active {
-      background: black;
-      color: white;
-    }
-
-    .section {
-      display: none;
-      min-height: calc(100vh - 70px);
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    .member-filter {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 12px 14px 0;
-    }
-
-    .member-chip {
-      padding: 9px 14px;
-      border-radius: 999px;
-      background: var(--soft);
-      color: var(--sub);
-      font-size: 12px;
-      white-space: nowrap;
-      border: 1px solid transparent;
-    }
-
-    .member-chip.active {
-      background: white;
-      color: black;
-      font-weight: 700;
-    }
-
-    body.light .member-chip.active {
-      background: black;
-      color: white;
-    }
-
-    .search-wrap {
-      padding: 14px;
-    }
-
-    .search-input {
-      width: 100%;
-      height: 46px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--soft);
-      padding: 0 16px;
-      color: var(--text);
-      outline: none;
-    }
-
-    .twitter-feed {
-      background: #000;
-    }
-
-    .twitter-post {
-      border-bottom: 1px solid #23252b;
-      padding: 14px;
-      display: flex;
-      gap: 12px;
-      transition: .2s;
-    }
-
-    .twitter-post:hover {
-      background: rgba(255,255,255,.03);
-    }
-
-    .tw-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .tw-grid {
-      margin-top: 12px;
-      border-radius: 18px;
-      overflow: hidden;
-      display: grid;
-      gap: 2px;
-      background: #2f3336;
-    }
-
-    .tw-grid img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      cursor: pointer;
-    }
-
-    .tw-grid.grid-1 {
-      grid-template-columns: 1fr;
-      height: 360px;
-    }
-
-    .tw-grid.grid-2 {
-      grid-template-columns: repeat(2,1fr);
-      height: 280px;
-    }
-
-    .tw-grid.grid-3,
-    .tw-grid.grid-4 {
-      grid-template-columns: repeat(2,1fr);
-      grid-template-rows: repeat(2,180px);
-    }
-
-    .tw-actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 14px;
-      color: #71767b;
-      font-size: 13px;
-    }
-
-    .weverse-wrap {
-      padding: 14px;
-      background: linear-gradient(to bottom,#121212,#000);
-    }
-
-    .weverse-card {
-      background: #1a1a1c;
-      border-radius: 26px;
-      padding: 18px;
-      margin-bottom: 16px;
-      border: 1px solid #25272d;
-    }
-
-    .weverse-gallery {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 4px;
-      margin-top: 14px;
-      border-radius: 18px;
-      overflow: hidden;
-    }
-
-    .weverse-gallery img {
-      width: 100%;
-      aspect-ratio: 1/1;
-      object-fit: cover;
-      cursor: pointer;
-    }
-
-    .secret-overlay {
-      margin-top: 16px;
-      background: rgba(255,255,255,.04);
-      border: 1px dashed rgba(255,255,255,.1);
-      padding: 20px;
-      border-radius: 18px;
-      text-align: center;
-      filter: blur(3px);
-    }
-
-    .ig-top {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 20;
-    }
-
-    .stories {
-      display: flex;
-      overflow-x: auto;
-      gap: 14px;
-      padding: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .story-item {
-      min-width: 72px;
-      text-align: center;
-    }
-
-    .story-ring {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      padding: 2px;
-      background: linear-gradient(45deg,#ff0069,#ff7a00,#ffd600);
-    }
-
-    .story-ring img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 3px solid var(--bg);
-    }
-
-    .ig-post {
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
-      background: var(--bg);
-    }
-
-    .ig-media {
-      position: relative;
-      overflow: hidden;
-      background: #111;
-    }
-
-    .ig-media img {
-      width: 100%;
-      aspect-ratio: 1/1;
-      object-fit: cover;
-      cursor: pointer;
-    }
-
-    .carousel-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 28px;
-      height: 28px;
-      background: rgba(0,0,0,.65);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 12px;
-    }
-
-    .admin-btn {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      border: none;
-      background: white;
-      color: black;
-      font-size: 20px;
-      z-index: 500;
-      box-shadow: 0 10px 30px rgba(0,0,0,.3);
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.78);
-      z-index: 999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-box {
-      width: 100%;
-      max-width: 640px;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: #101114;
-      border-radius: 28px;
-      padding: 22px;
-      color: white;
-    }
-
-    .modal-box input,
-    .modal-box textarea,
-    .modal-box select {
-      width: 100%;
-      background: #1c1e22;
-      border: 1px solid #2a2c30;
-      border-radius: 14px;
-      padding: 14px;
-      color: white;
-      margin-top: 10px;
-      outline: none;
-    }
-
-    .submit-btn {
-      width: 100%;
-      height: 50px;
-      border-radius: 16px;
-      border: none;
-      margin-top: 16px;
-      background: white;
-      color: black;
-      font-weight: 700;
-    }
-
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.96);
-      z-index: 3000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .lightbox.active {
-      display: flex;
-    }
-
-    .lightbox img {
-      width: 100%;
-      max-width: 92vw;
-      max-height: 92vh;
-      object-fit: contain;
-    }
-
-    .lightbox-arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .lightbox-prev { left: 20px; }
-    .lightbox-next { right: 20px; }
-
-    .dots-btn {
-      margin-left: auto;
-      color: var(--sub);
-      cursor: pointer;
-      position: relative;
-    }
-
-    .menu {
-      position: absolute;
-      right: 0;
-      top: 24px;
-      background: #17181c;
-      border: 1px solid #2a2c30;
-      border-radius: 14px;
-      overflow: hidden;
-      display: none;
-      z-index: 20;
-    }
-
-    .menu button {
-      width: 120px;
-      height: 42px;
-      border: none;
-      background: transparent;
-      color: white;
-      cursor: pointer;
-    }
-
-    .menu button:hover {
-      background: rgba(255,255,255,.06);
-    }
-
-    @media (min-width: 900px) {
-      .app-shell {
-        max-width: 1100px;
-        display: grid;
-        grid-template-columns: 320px 1fr;
-      }
-
-      .sidebar {
-        border-right: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        height: 100vh;
-      }
-
-      .main {
-        min-height: 100vh;
-      }
-
-      .topbar {
-        position: static;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CLÖW Archive</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --font-pretendard: 'Pretendard', system-ui, sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-pretendard);
+        }
+        
+        .no-double-tap {
+            touch-action: manipulation;
+        }
+        
+        .tweet-grid-1 { grid-template-columns: 1fr; }
+        .tweet-grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .tweet-grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .tweet-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        
+        .instagram-post {
+            aspect-ratio: 1 / 1;
+        }
+        
+        .modal {
+            animation: modalPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .story-circle {
+            padding: 3px;
+            background: linear-gradient(135deg, #f56040, #c13584, #405de6);
+        }
+    </style>
 </head>
-<body class="dark">
+<body class="bg-zinc-950 text-white no-double-tap overflow-x-hidden">
+    <div class="max-w-[1280px] mx-auto">
+        <!-- TOP NAV -->
+        <nav class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-800">
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="flex items-center gap-x-8">
+                    <div onclick="switchPlatform(0)" class="cursor-pointer flex items-center gap-x-2">
+                        <span class="text-2xl font-black tracking-tighter">CLÖW</span>
+                    </div>
+                    
+                    <div class="hidden md:flex items-center gap-x-6 text-sm font-medium">
+                        <div onclick="switchPlatform(0)" id="tab-twitter" 
+                             class="tab-btn active px-5 py-2 hover:bg-zinc-900 rounded-full cursor-pointer flex items-center gap-x-2">
+                            <i class="fa-brands fa-x-twitter"></i>
+                            <span>트위터</span>
+                        </div>
+                        <div onclick="switchPlatform(1)" id="tab-weverse" 
+                             class="tab-btn px-5 py-2 hover:bg-zinc-900 rounded-full cursor-pointer flex items-center gap-x-2">
+                            <i class="fa-solid fa-users"></i>
+                            <span>위버스</span>
+                        </div>
+                        <div onclick="switchPlatform(2)" id="tab-instagram" 
+                             class="tab-btn px-5 py-2 hover:bg-zinc-900 rounded-full cursor-pointer flex items-center gap-x-2">
+                            <i class="fa-brands fa-instagram"></i>
+                            <span>인스타그램</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-x-4">
+                    <button onclick="toggleSearch()" 
+                            class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-900">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    
+                    <button onclick="toggleTheme()" 
+                            class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-900">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+                    
+                    <button onclick="showAdminModal()" 
+                            class="bg-white text-black px-5 py-1.5 text-sm font-semibold rounded-full flex items-center gap-x-2 hover:bg-zinc-200">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">업로드</span>
+                    </button>
+                    
+                    <div onclick="toggleMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-<div class="app-shell">
+        <div class="h-14"></div>
 
-  <aside class="sidebar topbar">
-    <div class="platform-tabs hidden-scroll">
-      <button class="platform-btn active" data-platform="twitter">Twitter</button>
-      <button class="platform-btn" data-platform="weverse">Weverse</button>
-      <button class="platform-btn" data-platform="instagram">Instagram</button>
-      <button class="platform-btn" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+        <!-- MAIN CONTENT -->
+        <div class="flex">
+            
+            <!-- SIDEBAR - PC -->
+            <div class="hidden lg:flex w-64 flex-col border-r border-zinc-800 h-[calc(100vh-3.5rem)] fixed">
+                <div class="p-4">
+                    <div class="space-y-1">
+                        <div onclick="switchPlatform(0)" class="sidebar-item flex items-center gap-x-4 px-4 py-3 rounded-2xl cursor-pointer hover:bg-zinc-900">
+                            <i class="fa-brands fa-x-twitter text-xl"></i>
+                            <span class="font-semibold">트위터</span>
+                        </div>
+                        <div onclick="switchPlatform(1)" class="sidebar-item flex items-center gap-x-4 px-4 py-3 rounded-2xl cursor-pointer hover:bg-zinc-900">
+                            <i class="fa-solid fa-users text-xl"></i>
+                            <span class="font-semibold">위버스</span>
+                        </div>
+                        <div onclick="switchPlatform(2)" class="sidebar-item flex items-center gap-x-4 px-4 py-3 rounded-2xl cursor-pointer hover:bg-zinc-900">
+                            <i class="fa-brands fa-instagram text-xl"></i>
+                            <span class="font-semibold">인스타그램</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto p-4 border-t border-zinc-800">
+                    <div class="text-xs text-zinc-500 px-4 mb-3">MEMBERS</div>
+                    <div id="sidebar-members" class="space-y-1 text-sm"></div>
+                </div>
+            </div>
+
+            <!-- MAIN FEED AREA -->
+            <div class="flex-1 lg:ml-64" id="main-content">
+                <!-- TWITTER -->
+                <div id="platform-twitter" class="platform-content">
+                    <div class="max-w-xl mx-auto">
+                        <!-- Header -->
+                        <div class="sticky top-14 bg-black/80 backdrop-blur-lg border-b border-zinc-800 z-40 px-4 py-3 flex items-center justify-between">
+                            <div class="font-bold text-xl">홈</div>
+                            <div class="flex items-center gap-x-4">
+                                <select id="twitter-member-filter" onchange="filterTwitterPosts()" 
+                                        class="bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1 text-sm">
+                                    <option value="">전체 멤버</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Compose -->
+                        <div class="border-b border-zinc-800 p-4 hidden md:block">
+                            <div class="flex gap-x-4">
+                                <img src="https://picsum.photos/id/64/48/48" class="w-10 h-10 rounded-full">
+                                <div class="flex-1">
+                                    <textarea id="twitter-compose" rows="3" 
+                                        class="w-full bg-transparent outline-none resize-none text-lg placeholder-zinc-500"
+                                        placeholder="무슨 일이 일어나고 있나요?"></textarea>
+                                    <div id="twitter-preview" class="hidden grid gap-2 mt-3"></div>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <div class="flex gap-x-6 text-blue-500">
+                                            <label onclick="triggerImageUpload(0)" class="cursor-pointer">
+                                                <i class="fa-regular fa-image"></i>
+                                            </label>
+                                        </div>
+                                        <button onclick="postTwitter()" 
+                                            class="bg-blue-500 hover:bg-blue-600 px-6 py-1.5 rounded-full font-bold text-sm">
+                                            게시하기
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Posts -->
+                        <div id="twitter-feed" class="divide-y divide-zinc-800"></div>
+                    </div>
+                </div>
+
+                <!-- WEVERSE -->
+                <div id="platform-weverse" class="platform-content hidden">
+                    <div class="max-w-2xl mx-auto">
+                        <div class="sticky top-14 bg-black/80 backdrop-blur-lg border-b border-zinc-800 z-40 px-4 py-4">
+                            <div class="flex items-center justify-between">
+                                <div class="font-bold text-xl">커뮤니티</div>
+                                <select id="weverse-member-filter" onchange="filterWeversePosts()" 
+                                        class="bg-zinc-900 border border-zinc-700 rounded-3xl px-5 py-2 text-sm">
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="weverse-feed" class="p-4 space-y-8"></div>
+                    </div>
+                </div>
+
+                <!-- INSTAGRAM -->
+                <div id="platform-instagram" class="platform-content hidden">
+                    <div class="max-w-[600px] mx-auto">
+                        <!-- Stories -->
+                        <div class="border-b border-zinc-800 py-4 px-4 overflow-x-auto whitespace-nowrap">
+                            <div id="stories-container" class="flex gap-x-6"></div>
+                        </div>
+                        
+                        <!-- Feed -->
+                        <div id="instagram-feed" class="space-y-8 py-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL (PC) -->
+            <div class="hidden xl:block w-80 border-l border-zinc-800 h-[calc(100vh-3.5rem)] p-4 overflow-auto">
+                <div class="sticky top-4 space-y-8">
+                    <!-- Member Profiles -->
+                    <div>
+                        <div class="font-semibold mb-4 px-2">아티스트</div>
+                        <div id="right-members" class="space-y-4"></div>
+                    </div>
+                    
+                    <!-- Trending -->
+                    <div class="bg-zinc-900 rounded-3xl p-4">
+                        <div class="font-bold mb-4">트렌딩 #CLÖW</div>
+                        <div class="space-y-4 text-sm">
+                            <div class="hover:bg-zinc-800 p-2 -mx-2 rounded-2xl cursor-pointer">#era2025</div>
+                            <div class="hover:bg-zinc-800 p-2 -mx-2 rounded-2xl cursor-pointer">#션린위</div>
+                            <div class="hover:bg-zinc-800 p-2 -mx-2 rounded-2xl cursor-pointer">#로아데뷔</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="member-filter hidden-scroll" id="memberFilter"></div>
-
-    <div class="search-wrap">
-      <input id="searchInput" class="search-input" placeholder="멤버 / 해시태그 / era / 날짜 검색" />
-    </div>
-  </aside>
-
-  <main class="main">
-
-    <section id="twitter" class="section active twitter-feed"></section>
-
-    <section id="weverse" class="section">
-      <div class="weverse-wrap" id="weverseFeed"></div>
-    </section>
-
-    <section id="instagram" class="section">
-      <div class="ig-top">
-        <div class="flex items-center justify-between">
-          <div class="text-[22px] font-bold">Instagram</div>
-          <div class="flex gap-4 text-[20px]">
-            <i class="fa-regular fa-heart"></i>
-            <i class="fa-regular fa-paper-plane"></i>
-          </div>
+    <!-- MOBILE BOTTOM NAV -->
+    <div class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 md:hidden z-50">
+        <div class="flex items-center justify-around py-2 text-2xl">
+            <div onclick="switchPlatform(0)" class="mobile-nav-item active"><i class="fa-brands fa-x-twitter"></i></div>
+            <div onclick="switchPlatform(1)" class="mobile-nav-item"><i class="fa-solid fa-users"></i></div>
+            <div onclick="switchPlatform(2)" class="mobile-nav-item"><i class="fa-brands fa-instagram"></i></div>
+            <div onclick="showAdminModal()" class="mobile-nav-item"><i class="fa-solid fa-plus"></i></div>
         </div>
-      </div>
-
-      <div class="stories hidden-scroll" id="stories"></div>
-
-      <div id="instagramFeed"></div>
-    </section>
-
-  </main>
-</div>
-
-<button class="admin-btn" id="adminOpen">
-  <i class="fa-solid fa-plus"></i>
-</button>
-
-<div class="modal" id="adminModal">
-  <div class="modal-box">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-[24px] font-bold">관리자 업로드</h2>
-      <button onclick="closeAdmin()"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <select id="platformSelect">
-      <option value="twitter">트위터</option>
-      <option value="weverse">위버스</option>
-      <option value="instagram">인스타그램</option>
-    </select>
-
-    <select id="memberSelect"></select>
-
-    <input type="date" id="dateInput">
-
-    <input type="text" id="eraInput" placeholder="era 태그">
-
-    <textarea id="contentInput" rows="5" placeholder="내용 입력"></textarea>
-
-    <input type="password" id="secretPassword" placeholder="비밀포스트 비밀번호 (위버스용)">
-
-    <label class="flex items-center gap-2 mt-4 text-[14px]">
-      <input type="checkbox" id="secretToggle">
-      비밀포스트
-    </label>
-
-    <input type="file" id="imageInput" multiple accept="image/*">
-
-    <button class="submit-btn" id="uploadBtn">업로드</button>
-  </div>
-</div>
-
-<div class="lightbox" id="lightbox">
-  <div class="lightbox-arrow lightbox-prev"><i class="fa-solid fa-chevron-left"></i></div>
-  <img id="lightboxImage">
-  <div class="lightbox-arrow lightbox-next"><i class="fa-solid fa-chevron-right"></i></div>
-</div>
-
-<script type="module">
-
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  updateDoc,
-  doc,
-  orderBy,
-  query
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-/* =========================
-   CLOUDINARY CONFIG
-========================= */
-
-const CLOUDINARY_CLOUD = 'dbljkloal';
-const CLOUDINARY_PRESET = 'clowofficial';
-
-/* =========================
-   FIREBASE CONFIG
-========================= */
-
-const firebaseConfig = {
-  apiKey: 'AIzaSyAA6mbdYfLrrgCJjN47PX91_mU7I53RiBs',
-  authDomain: 'site-c67b4.firebaseapp.com',
-  projectId: 'site-c67b4',
-  storageBucket: 'site-c67b4.firebasestorage.app',
-  messagingSenderId: '744761377245',
-  appId: '1:744761377245:web:3ddaee14f184716eeef634'
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const MEMBERS = [
-  '션린위',
-  '해인',
-  '로아',
-  '남해주',
-  '로은',
-  '서도윤',
-  '루이',
-  '범지유'
-];
-
-let activePlatform = 'twitter';
-let activeMembers = [];
-let posts = [];
-let stories = [];
-let lightboxImages = [];
-let lightboxIndex = 0;
-
-/* =========================
-   PREVENT DOUBLE TAP ZOOM
-========================= */
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', (e) => {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  lastTouchEnd = now;
-}, { passive: false });
-
-/* =========================
-   THEME
-========================= */
-
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.body.className = savedTheme;
-
-function toggleTheme() {
-  const next = document.body.classList.contains('dark') ? 'light' : 'dark';
-  document.body.className = next;
-  localStorage.setItem('theme', next);
-}
-
-document.getElementById('themeToggle').onclick = toggleTheme;
-
-/* =========================
-   FILTERS
-========================= */
-
-const memberFilter = document.getElementById('memberFilter');
-const memberSelect = document.getElementById('memberSelect');
-
-MEMBERS.forEach(member => {
-
-  const chip = document.createElement('button');
-  chip.className = 'member-chip';
-  chip.innerText = member;
-
-  chip.onclick = () => {
-    chip.classList.toggle('active');
-
-    if (activeMembers.includes(member)) {
-      activeMembers = activeMembers.filter(v => v !== member);
-    } else {
-      activeMembers.push(member);
-    }
-
-    renderAll();
-  };
-
-  memberFilter.appendChild(chip);
-
-  const option = document.createElement('option');
-  option.value = member;
-  option.innerText = member;
-  memberSelect.appendChild(option);
-});
-
-/* =========================
-   PLATFORM SWITCH
-========================= */
-
-const platformButtons = document.querySelectorAll('.platform-btn[data-platform]');
-
-platformButtons.forEach(btn => {
-  btn.onclick = () => {
-
-    platformButtons.forEach(v => v.classList.remove('active'));
-    btn.classList.add('active');
-
-    activePlatform = btn.dataset.platform;
-
-    document.querySelectorAll('.section').forEach(sec => {
-      sec.classList.remove('active');
-    });
-
-    document.getElementById(activePlatform).classList.add('active');
-  };
-});
-
-/* =========================
-   SEARCH
-========================= */
-
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', renderAll);
-
-function filteredPosts(platform) {
-
-  const q = searchInput.value.toLowerCase();
-
-  return posts.filter(post => {
-
-    if (post.platform !== platform) return false;
-
-    if (activeMembers.length > 0 && !activeMembers.includes(post.member)) {
-      return false;
-    }
-
-    const searchText = `${post.member} ${post.content} ${post.era} ${post.date}`.toLowerCase();
-
-    return searchText.includes(q);
-  });
-}
-
-/* =========================
-   CLOUDINARY
-========================= */
-
-async function uploadToCloudinary(file) {
-
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', CLOUDINARY_PRESET);
-
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-    method: 'POST',
-    body: formData
-  });
-
-  const data = await res.json();
-  return data.secure_url;
-}
-
-/* =========================
-   ADMIN
-========================= */
-
-const adminModal = document.getElementById('adminModal');
-
-function closeAdmin() {
-  adminModal.classList.remove('active');
-}
-
-window.closeAdmin = closeAdmin;
-
-document.getElementById('adminOpen').onclick = () => {
-  adminModal.classList.add('active');
-};
-
-/* =========================
-   RANDOM COUNTS
-========================= */
-
-function random(min,max){
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/* =========================
-   UPLOAD
-========================= */
-
-const uploadBtn = document.getElementById('uploadBtn');
-
-uploadBtn.onclick = async () => {
-
-  const platform = document.getElementById('platformSelect').value;
-  const member = document.getElementById('memberSelect').value;
-  const date = document.getElementById('dateInput').value;
-  const era = document.getElementById('eraInput').value;
-  const content = document.getElementById('contentInput').value;
-  const files = [...document.getElementById('imageInput').files];
-  const secret = document.getElementById('secretToggle').checked;
-  const password = document.getElementById('secretPassword').value;
-
-  if (platform === 'instagram' && files.length === 0) {
-    alert('인스타그램 게시물은 이미지를 반드시 포함해야 합니다.');
-    return;
-  }
-
-  if (platform === 'twitter' && files.length > 4) {
-    alert('트위터는 최대 4장까지 가능합니다.');
-    return;
-  }
-
-  if (platform === 'instagram' && files.length > 10) {
-    alert('인스타그램은 최대 10장까지 가능합니다.');
-    return;
-  }
-
-  const uploadedImages = [];
-
-  for (const file of files) {
-    const url = await uploadToCloudinary(file);
-    uploadedImages.push(url);
-  }
-
-  const likes = platform === 'twitter'
-    ? random(800,5000)
-    : platform === 'weverse'
-    ? random(300,3000)
-    : random(1200,14000);
-
-  const retweets = random(200, likes - 100);
-
-  await addDoc(collection(db, 'posts'), {
-    platform,
-    member,
-    date,
-    era,
-    content,
-    images: uploadedImages,
-    likes,
-    retweets,
-    secret,
-    password,
-    createdAt: Date.now()
-  });
-
-  closeAdmin();
-  loadPosts();
-};
-
-/* =========================
-   LIGHTBOX
-========================= */
-
-const lightbox = document.getElementById('lightbox');
-const lightboxImage = document.getElementById('lightboxImage');
-
-function openLightbox(images,index){
-  lightboxImages = images;
-  lightboxIndex = index;
-  lightbox.classList.add('active');
-  updateLightbox();
-}
-
-function updateLightbox(){
-  lightboxImage.src = lightboxImages[lightboxIndex];
-}
-
-function nextLightbox(){
-  lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
-  updateLightbox();
-}
-
-function prevLightbox(){
-  lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
-  updateLightbox();
-}
-
-lightbox.onclick = (e) => {
-  if (e.target === lightbox) {
-    lightbox.classList.remove('active');
-  }
-};
-
-document.querySelector('.lightbox-next').onclick = nextLightbox;
-document.querySelector('.lightbox-prev').onclick = prevLightbox;
-
-/* =========================
-   RENDER
-========================= */
-
-function renderTwitter(){
-
-  const container = document.getElementById('twitter');
-
-  container.innerHTML = filteredPosts('twitter').map(post => {
-
-    const images = post.images || [];
-
-    return `
-      <article class="twitter-post">
-
-        <img class="tw-avatar" src="https://i.imgur.com/wSTFkRM.jpeg">
-
-        <div class="w-full">
-
-          <div class="flex items-center gap-2">
-            <div class="font-bold text-white">${post.member}</div>
-            <div class="text-[#71767b] text-[14px]">@archive · ${post.date}</div>
-
-            <div class="dots-btn">
-              <i class="fa-solid fa-ellipsis"></i>
-
-              <div class="menu">
-                <button onclick="editPost('${post.id}')">수정</button>
-                <button onclick="deletePost('${post.id}')">삭제</button>
-              </div>
+    <!-- IMAGE VIEWER MODAL -->
+    <div id="image-viewer" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center">
+        <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col">
+            <button onclick="closeImageViewer()" 
+                    class="absolute top-6 right-6 text-white text-4xl z-10">×</button>
+            
+            <div id="viewer-content" class="flex-1 flex items-center justify-center overflow-hidden"></div>
+            
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-4 py-2 rounded-full flex items-center gap-x-2">
+                <span id="viewer-counter">1 / 1</span>
             </div>
-          </div>
-
-          <div class="text-white text-[15px] leading-[1.55] mt-1 whitespace-pre-wrap">
-            ${post.content}
-          </div>
-
-          ${images.length > 0 ? `
-            <div class="tw-grid grid-${Math.min(images.length,4)}">
-              ${images.map((img,i)=>`
-                <img onclick='openGallery(${JSON.stringify(images)},${i})' src="${img}">
-              `).join('')}
-            </div>
-          ` : ''}
-
-          <div class="tw-actions">
-            <div><i class="fa-solid fa-retweet"></i> ${post.retweets.toLocaleString()}</div>
-            <div><i class="fa-regular fa-heart"></i> ${post.likes.toLocaleString()}</div>
-          </div>
-
         </div>
-      </article>
-    `;
+    </div>
 
-  }).join('');
-
-  bindMenus();
-}
-
-function renderWeverse(){
-
-  const container = document.getElementById('weverseFeed');
-
-  container.innerHTML = filteredPosts('weverse').map(post => {
-
-    const hidden = post.secret;
-
-    return `
-      <div class="weverse-card">
-
-        <div class="flex items-center gap-3">
-          <img class="w-[48px] h-[48px] rounded-full object-cover" src="https://i.imgur.com/wSTFkRM.jpeg">
-
-          <div>
-            <div class="font-semibold text-[15px]">${post.member}</div>
-            <div class="text-[#868686] text-[12px]">${post.date}</div>
-          </div>
-
-          <div class="dots-btn">
-            <i class="fa-solid fa-ellipsis"></i>
-
-            <div class="menu">
-              <button onclick="editPost('${post.id}')">수정</button>
-              <button onclick="deletePost('${post.id}')">삭제</button>
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="hidden fixed inset-0 bg-black/70 z-[200] flex items-center justify-center">
+        <div class="bg-zinc-900 rounded-3xl w-full max-w-lg mx-4 modal">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="text-xl font-bold">새 게시물 업로드</div>
+                    <button onclick="hideAdminModal()" class="text-3xl leading-none">×</button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">플랫폼</label>
+                        <div class="flex gap-2">
+                            <button onclick="selectAdminPlatform(0)" id="admin-plat-0"
+                                class="admin-plat-btn flex-1 py-3 rounded-2xl text-sm font-medium bg-zinc-800">트위터</button>
+                            <button onclick="selectAdminPlatform(1)" id="admin-plat-1"
+                                class="admin-plat-btn flex-1 py-3 rounded-2xl text-sm font-medium">위버스</button>
+                            <button onclick="selectAdminPlatform(2)" id="admin-plat-2"
+                                class="admin-plat-btn flex-1 py-3 rounded-2xl text-sm font-medium">인스타</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">멤버</label>
+                        <select id="admin-member" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3"></select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">날짜</label>
+                            <input id="admin-date" type="date" value="2026-05-20" 
+                                   class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Era</label>
+                            <input id="admin-era" type="text" placeholder="2025 Summer" 
+                                   class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">내용</label>
+                        <textarea id="admin-content" rows="4" 
+                            class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-4 resize-none"></textarea>
+                    </div>
+                    
+                    <!-- Secret post for Weverse -->
+                    <div id="weverse-secret-option" class="hidden">
+                        <label class="flex items-center gap-x-2 cursor-pointer">
+                            <input id="is-secret" type="checkbox" class="w-4 h-4 accent-white">
+                            <span class="text-sm">비밀 포스트</span>
+                        </label>
+                        <input id="secret-password" placeholder="비밀번호 (4자리)" maxlength="4"
+                               class="hidden mt-2 w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-center">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-2">이미지 업로드</label>
+                        <label id="admin-upload-label" 
+                               class="border border-dashed border-zinc-600 rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-colors">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl mb-3 text-zinc-400"></i>
+                            <div class="text-sm text-zinc-400">이미지 선택 (최대 10장)</div>
+                            <input id="admin-file-input" type="file" multiple accept="image/*" class="hidden">
+                        </label>
+                        <div id="admin-image-preview" class="grid grid-cols-4 gap-3 mt-4"></div>
+                    </div>
+                    
+                    <button onclick="submitAdminPost()" 
+                            class="w-full bg-white text-black font-bold py-4 rounded-3xl text-lg">
+                        게시하기
+                    </button>
+                </div>
             </div>
-          </div>
         </div>
-
-        ${hidden ? `
-          <div class="secret-overlay">
-            <i class="fa-solid fa-lock text-[28px] mb-3"></i>
-            <div>비밀포스트</div>
-          </div>
-
-          <button class="submit-btn" onclick="unlockPost('${post.password}','${post.id}')">비밀번호 입력</button>
-        ` : `
-
-          <div class="mt-4 leading-[1.7] whitespace-pre-wrap text-[15px]">
-            ${post.content}
-          </div>
-
-          ${post.images?.length ? `
-            <div class="weverse-gallery">
-              ${post.images.slice(0,9).map((img,i)=>`
-                <img onclick='openGallery(${JSON.stringify(post.images)},${i})' src="${img}">
-              `).join('')}
-            </div>
-          ` : ''}
-
-          <div class="flex items-center justify-between mt-5 text-[14px] text-[#a0a0a0]">
-            <div><i class="fa-regular fa-heart"></i> ${post.likes.toLocaleString()}</div>
-            <button>번역 보기</button>
-          </div>
-        `}
-
-      </div>
-    `;
-
-  }).join('');
-
-  bindMenus();
-}
-
-function renderInstagram(){
-
-  const container = document.getElementById('instagramFeed');
-
-  container.innerHTML = filteredPosts('instagram').map(post => {
-
-    return `
-      <article class="ig-post">
-
-        <div class="flex items-center gap-3 px-4 py-3">
-          <img class="w-[34px] h-[34px] rounded-full object-cover" src="https://i.imgur.com/wSTFkRM.jpeg">
-
-          <div class="font-semibold text-[14px]">${post.member}</div>
-
-          <div class="dots-btn">
-            <i class="fa-solid fa-ellipsis"></i>
-
-            <div class="menu">
-              <button onclick="editPost('${post.id}')">수정</button>
-              <button onclick="deletePost('${post.id}')">삭제</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="ig-media">
-
-          <img onclick='openGallery(${JSON.stringify(post.images)},0)' src="${post.images[0]}">
-
-          ${post.images.length > 1 ? `
-            <div class="carousel-badge">
-              <i class="fa-regular fa-clone"></i>
-            </div>
-          ` : ''}
-
-        </div>
-
-        <div class="px-4 py-3">
-
-          <div class="flex items-center justify-between text-[23px] mb-3">
-            <div class="flex gap-4">
-              <i class="fa-regular fa-heart"></i>
-              <i class="fa-regular fa-comment"></i>
-              <i class="fa-regular fa-paper-plane"></i>
-            </div>
-
-            <i class="fa-regular fa-bookmark"></i>
-          </div>
-
-          <div class="font-semibold text-[14px] mb-2">
-            좋아요 ${post.likes.toLocaleString()}개
-          </div>
-
-          <div class="text-[14px] leading-[1.6]">
-            <b>${post.member}</b>
-            ${post.content}
-          </div>
-
-          <div class="text-[12px] text-[var(--sub)] mt-2">
-            ${post.date}
-          </div>
-
-        </div>
-      </article>
-    `;
-
-  }).join('');
-
-  bindMenus();
-}
-
-function renderStories(){
-
-  const container = document.getElementById('stories');
-
-  container.innerHTML = MEMBERS.map(member => {
-
-    return `
-      <div class="story-item">
-        <div class="story-ring">
-          <img src="https://i.imgur.com/wSTFkRM.jpeg">
-        </div>
-
-        <div class="text-[12px] mt-2">${member}</div>
-      </div>
-    `;
-
-  }).join('');
-}
-
-function renderAll(){
-  renderTwitter();
-  renderWeverse();
-  renderInstagram();
-  renderStories();
-}
-
-/* =========================
-   MENUS
-========================= */
-
-function bindMenus(){
-
-  document.querySelectorAll('.dots-btn').forEach(btn => {
-
-    btn.onclick = (e) => {
-      e.stopPropagation();
-
-      const menu = btn.querySelector('.menu');
-
-      document.querySelectorAll('.menu').forEach(m => {
-        if (m !== menu) m.style.display = 'none';
-      });
-
-      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    };
-  });
-}
-
-window.addEventListener('click',()=>{
-  document.querySelectorAll('.menu').forEach(m=>m.style.display='none');
-});
-
-/* =========================
-   EDIT / DELETE
-========================= */
-
-window.deletePost = async (id) => {
-
-  if (!confirm('삭제하시겠습니까?')) return;
-
-  await deleteDoc(doc(db,'posts',id));
-  loadPosts();
-};
-
-window.editPost = (id) => {
-  alert('편집 기능 영역입니다. 현재 구조에서 기존 데이터 불러와 수정창 연결하면 됩니다.');
-};
-
-window.unlockPost = (password,id) => {
-
-  const input = prompt('비밀번호 입력');
-
-  if (input === password) {
-
-    const target = posts.find(v=>v.id===id);
-    target.secret = false;
-    renderWeverse();
-
-  } else {
-    alert('비밀번호가 올바르지 않습니다.');
-  }
-};
-
-window.openGallery = (images,index) => {
-  openLightbox(images,index);
-};
-
-/* =========================
-   LOAD POSTS
-========================= */
-
-async function loadPosts(){
-
-  const q = query(collection(db,'posts'), orderBy('createdAt','desc'));
-
-  const snapshot = await getDocs(q);
-
-  posts = snapshot.docs.map(docu => ({
-    id: docu.id,
-    ...docu.data()
-  }));
-
-  renderAll();
-}
-
-loadPosts();
-
-</script>
-
+    </div>
+
+    <script>
+        // Tailwind script
+        function initTailwind() {
+            // Already using CDN
+        }
+        
+        // Members
+        const members = [
+            "션린위", "해인", "로아", "남해주", 
+            "로은", "서도윤", "루이", "범지유"
+        ]
+        
+        let currentPlatform = 0 // 0: twitter, 1: weverse, 2: instagram
+        let currentTheme = 'dark'
+        let posts = {
+            twitter: [],
+            weverse: [],
+            instagram: []
+        }
+        let stories = []
+        let selectedAdminImages = []
+        let selectedAdminPlatform = 0
+        
+        // Fake initial data
+        function seedInitialData() {
+            // Twitter
+            posts.twitter = [
+                {
+                    id: 1,
+                    member: "션린위",
+                    handle: "@seonrinwi",
+                    time: "2시간",
+                    content: "오늘 연습실에서 새로운 안무 짜보는 중인데 진짜 재밌어요 🔥",
+                    images: ["https://picsum.photos/id/1015/800/600"],
+                    likes: 2341,
+                    retweets: 421
+                },
+                {
+                    id: 2,
+                    member: "로아",
+                    handle: "@roa_clow",
+                    time: "5시간",
+                    content: "여러분 덕분에 오늘도 행복한 하루였습니다 💕",
+                    images: ["https://picsum.photos/id/201/800/1000", "https://picsum.photos/id/202/800/1000"],
+                    likes: 4120,
+                    retweets: 892
+                }
+            ]
+            
+            // Weverse
+            posts.weverse = [
+                {
+                    id: 101,
+                    member: "해인",
+                    time: "11시간 전",
+                    content: "오늘 무대 끝나고 멤버들이랑 사진 많이 찍었어요~",
+                    images: ["https://picsum.photos/id/301/900/600"],
+                    likes: 1240,
+                    isSecret: false
+                }
+            ]
+            
+            // Instagram
+            posts.instagram = [
+                {
+                    id: 201,
+                    member: "남해주",
+                    images: ["https://picsum.photos/id/401/800/800"],
+                    content: "새로운 계절과 함께 🌸",
+                    likes: 8740
+                }
+            ]
+            
+            // Stories
+            stories = [
+                { member: "션린위", image: "https://picsum.photos/id/64/200/200" },
+                { member: "로아", image: "https://picsum.photos/id/201/200/200" },
+                { member: "해인", image: "https://picsum.photos/id/301/200/200" }
+            ]
+        }
+        
+        function renderMembers() {
+            const containers = ['sidebar-members', 'right-members']
+            
+            containers.forEach(id => {
+                const el = document.getElementById(id)
+                if (!el) return
+                el.innerHTML = ''
+                
+                members.forEach(member => {
+                    const div = document.createElement('div')
+                    div.className = `flex items-center gap-x-3 px-3 py-2 hover:bg-zinc-900 rounded-2xl cursor-pointer`
+                    div.innerHTML = `
+                        <div class="w-8 h-8 bg-zinc-700 rounded-2xl flex items-center justify-center text-xs font-bold">${member.substring(0,1)}</div>
+                        <span>${member}</span>
+                    `
+                    el.appendChild(div)
+                })
+            })
+        }
+        
+        function populateMemberSelects() {
+            const selects = ['twitter-member-filter', 'weverse-member-filter', 'admin-member']
+            
+            selects.forEach(id => {
+                const select = document.getElementById(id)
+                if (!select) return
+                
+                // Clear
+                select.innerHTML = `<option value="">전체</option>`
+                
+                members.forEach(m => {
+                    const opt = document.createElement('option')
+                    opt.value = m
+                    opt.textContent = m
+                    select.appendChild(opt)
+                })
+            })
+        }
+        
+        function switchPlatform(n) {
+            currentPlatform = n
+            
+            document.querySelectorAll('.platform-content').forEach(el => el.classList.add('hidden'))
+            document.getElementById(`platform-${['twitter','weverse','instagram'][n]}`).classList.remove('hidden')
+            
+            // Update active tabs
+            document.querySelectorAll('.tab-btn').forEach((el, i) => {
+                if (i === n) el.classList.add('active', 'bg-zinc-900')
+                else el.classList.remove('active', 'bg-zinc-900')
+            })
+            
+            document.querySelectorAll('.mobile-nav-item').forEach((el, i) => {
+                if (i === n) el.classList.add('active', 'text-blue-400')
+                else el.classList.remove('active', 'text-blue-400')
+            })
+        }
+        
+        function renderTwitterFeed() {
+            const container = document.getElementById('twitter-feed')
+            container.innerHTML = ''
+            
+            posts.twitter.forEach(post => {
+                const div = document.createElement('div')
+                div.className = 'p-4 hover:bg-zinc-950 transition-colors border-b border-zinc-800'
+                div.innerHTML = `
+                    <div class="flex gap-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-violet-500 rounded-full flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-x-2">
+                                <span class="font-bold">${post.member}</span>
+                                <span class="text-zinc-500">${post.handle}</span>
+                                <span class="text-zinc-500">·</span>
+                                <span class="text-zinc-500">${post.time}</span>
+                            </div>
+                            <div class="mt-1 text-[15px] leading-relaxed">${post.content}</div>
+                            
+                            ${post.images && post.images.length ? `
+                            <div class="mt-3 rounded-3xl overflow-hidden border border-zinc-700 ${post.images.length > 1 ? 'grid gap-1' : ''}" 
+                                 style="grid-template-columns: ${post.images.length === 3 ? 'repeat(2,1fr)' : '1fr'};">
+                                ${post.images.map((img, i) => `
+                                    <img onclick="openImageViewer([${post.images.map(url => `'${url}'`)}], ${i})" 
+                                         src="${img}" 
+                                         class="w-full cursor-pointer hover:brightness-90 transition-all ${post.images.length === 1 ? 'aspect-video object-cover' : 'aspect-square object-cover'}">
+                                `).join('')}
+                            </div>` : ''}
+                            
+                            <div class="flex justify-between mt-4 max-w-[280px] text-zinc-400">
+                                <div onclick="likePost('twitter', ${post.id})" class="flex items-center gap-x-2 hover:text-blue-400 cursor-pointer">
+                                    <i class="fa-regular fa-comment"></i>
+                                </div>
+                                <div onclick="retweetPost(${post.id})" class="flex items-center gap-x-2 hover:text-green-400 cursor-pointer">
+                                    <i class="fa-solid fa-retweet"></i>
+                                    <span class="text-xs">${post.retweets}</span>
+                                </div>
+                                <div onclick="likePost('twitter', ${post.id})" class="flex items-center gap-x-2 hover:text-red-400 cursor-pointer">
+                                    <i class="fa-regular fa-heart"></i>
+                                    <span class="text-xs">${post.likes}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+                container.appendChild(div)
+            })
+        }
+        
+        function renderWeverseFeed() {
+            const container = document.getElementById('weverse-feed')
+            container.innerHTML = ''
+            
+            posts.weverse.forEach(post => {
+                const card = document.createElement('div')
+                card.className = 'bg-zinc-900 rounded-3xl overflow-hidden'
+                card.innerHTML = `
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center gap-x-3">
+                            <div class="w-9 h-9 bg-rose-400 rounded-2xl"></div>
+                            <div>
+                                <div class="font-medium">${post.member}</div>
+                                <div class="text-xs text-zinc-500">${post.time}</div>
+                            </div>
+                        </div>
+                        ${post.isSecret ? `<i class="fa-solid fa-lock text-amber-400"></i>` : ''}
+                    </div>
+                    
+                    ${post.images && post.images.length ? `
+                    <div class="px-4 pb-3">
+                        <img onclick="openImageViewer(['${post.images[0]}'])" src="${post.images[0]}" class="w-full rounded-3xl">
+                    </div>` : ''}
+                    
+                    <div class="px-5 pb-5 text-[15px]">${post.content}</div>
+                    
+                    <div class="border-t border-zinc-800 px-5 py-4 flex items-center justify-between text-sm">
+                        <button onclick="likePost('weverse', ${post.id}); this.classList.add('text-red-400')" 
+                                class="flex items-center gap-x-2">
+                            <i class="fa-regular fa-heart"></i>
+                            <span>${post.likes}</span>
+                        </button>
+                        <button class="text-blue-400 flex items-center gap-x-1">
+                            <span>번역 보기</span>
+                        </button>
+                    </div>
+                `
+                container.appendChild(card)
+            })
+        }
+        
+        function renderInstagramFeed() {
+            const container = document.getElementById('instagram-feed')
+            container.innerHTML = ''
+            
+            posts.instagram.forEach(post => {
+                const el = document.createElement('div')
+                el.className = 'mb-8'
+                el.innerHTML = `
+                    <div class="flex items-center justify-between px-4 mb-3">
+                        <div class="flex items-center gap-x-3">
+                            <div class="w-8 h-8 bg-purple-500 rounded-2xl"></div>
+                            <div class="font-medium">${post.member}</div>
+                        </div>
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </div>
+                    
+                    <div onclick="openImageViewer(['${post.images[0]}'])" class="instagram-post bg-zinc-800 rounded-none cursor-pointer">
+                        <img src="${post.images[0]}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="flex justify-between items-center px-4 py-3">
+                        <div class="flex gap-x-6">
+                            <i onclick="likePost('instagram', ${post.id}); this.classList.toggle('text-red-500'); this.classList.toggle('fa-solid')" 
+                               class="fa-regular fa-heart text-2xl cursor-pointer"></i>
+                            <i class="fa-regular fa-comment text-2xl"></i>
+                        </div>
+                        <div class="text-sm font-medium">${post.likes.toLocaleString()} 좋아요</div>
+                    </div>
+                    
+                    ${post.content ? `<div class="px-4 text-sm">${post.content}</div>` : ''}
+                `
+                container.appendChild(el)
+            })
+        }
+        
+        function renderStories() {
+            const container = document.getElementById('stories-container')
+            container.innerHTML = ''
+            
+            stories.forEach(story => {
+                const div = document.createElement('div')
+                div.className = 'flex flex-col items-center gap-y-1 cursor-pointer'
+                div.innerHTML = `
+                    <div class="story-circle rounded-full">
+                        <img src="${story.image}" class="w-16 h-16 rounded-full ring-2 ring-offset-2 ring-offset-black ring-white object-cover">
+                    </div>
+                    <div class="text-xs text-zinc-300">${story.member}</div>
+                `
+                container.appendChild(div)
+            })
+        }
+        
+        function openImageViewer(imageArray, startIndex = 0) {
+            const viewer = document.getElementById('image-viewer')
+            const content = document.getElementById('viewer-content')
+            
+            let currentIndex = startIndex
+            
+            function showImage() {
+                content.innerHTML = `
+                    <img src="${imageArray[currentIndex]}" 
+                         class="max-h-[80vh] max-w-full object-contain">
+                `
+                document.getElementById('viewer-counter').textContent = `${currentIndex + 1} / ${imageArray.length}`
+            }
+            
+            // Add swipe support later if needed
+            viewer.onclick = function(e) {
+                if (e.target.id === 'image-viewer') closeImageViewer()
+            }
+            
+            viewer.classList.remove('hidden')
+            showImage()
+        }
+        
+        function closeImageViewer() {
+            document.getElementById('image-viewer').classList.add('hidden')
+        }
+        
+        function likePost(platform, id) {
+            // Fake increase
+            console.log(`Liked ${platform} post ${id}`)
+        }
+        
+        function retweetPost(id) {
+            alert('리트윗 되었습니다!')
+        }
+        
+        function postTwitter() {
+            const textarea = document.getElementById('twitter-compose')
+            if (!textarea.value.trim()) return
+            
+            const newPost = {
+                id: Date.now(),
+                member: "나",
+                handle: "@user",
+                time: "방금",
+                content: textarea.value,
+                images: [],
+                likes: Math.floor(Math.random() * 1200) + 300,
+                retweets: Math.floor(Math.random() * 300) + 50
+            }
+            
+            posts.twitter.unshift(newPost)
+            renderTwitterFeed()
+            textarea.value = ''
+        }
+        
+        function triggerImageUpload(platform) {
+            alert('이미지 업로드는 관리자 페이지에서 가능합니다.')
+        }
+        
+        function toggleTheme() {
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('light')
+                currentTheme = 'light'
+                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun')
+            } else {
+                document.documentElement.classList.remove('light')
+                currentTheme = 'dark'
+                document.getElementById('theme-icon').classList.replace('fa-sun', 'fa-moon')
+            }
+        }
+        
+        function showAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden')
+            document.getElementById('admin-image-preview').innerHTML = ''
+            selectedAdminImages = []
+        }
+        
+        function hideAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden')
+        }
+        
+        function selectAdminPlatform(n) {
+            selectedAdminPlatform = n
+            document.querySelectorAll('.admin-plat-btn').forEach((el, i) => {
+                if (i === n) {
+                    el.classList.add('bg-white', 'text-black')
+                } else {
+                    el.classList.remove('bg-white', 'text-black')
+                }
+            })
+            
+            document.getElementById('weverse-secret-option').classList.toggle('hidden', n !== 1)
+        }
+        
+        function submitAdminPost() {
+            const content = document.getElementById('admin-content').value
+            const member = document.getElementById('admin-member').value || members[0]
+            
+            if (!content) {
+                alert('내용을 입력해주세요.')
+                return
+            }
+            
+            const newPost = {
+                id: Date.now(),
+                member: member,
+                content: content,
+                images: selectedAdminImages.length ? selectedAdminImages : [],
+                likes: Math.floor(300 + Math.random() * 3000),
+                time: '방금'
+            }
+            
+            if (selectedAdminPlatform === 0) {
+                posts.twitter.unshift(newPost)
+                renderTwitterFeed()
+            } else if (selectedAdminPlatform === 1) {
+                newPost.isSecret = document.getElementById('is-secret').checked
+                posts.weverse.unshift(newPost)
+                renderWeverseFeed()
+            } else if (selectedAdminPlatform === 2) {
+                posts.instagram.unshift(newPost)
+                renderInstagramFeed()
+            }
+            
+            hideAdminModal()
+            alert('게시물이 업로드 되었습니다!')
+        }
+        
+        // File upload simulation
+        function setupFileUpload() {
+            const input = document.getElementById('admin-file-input')
+            const label = document.getElementById('admin-upload-label')
+            const previewContainer = document.getElementById('admin-image-preview')
+            
+            label.addEventListener('click', () => input.click())
+            
+            input.addEventListener('change', function() {
+                previewContainer.innerHTML = ''
+                selectedAdminImages = []
+                
+                Array.from(this.files).slice(0, 10).forEach(file => {
+                    const reader = new FileReader()
+                    reader.onload = function(e) {
+                        selectedAdminImages.push(e.target.result)
+                        
+                        const imgDiv = document.createElement('div')
+                        imgDiv.className = 'aspect-square rounded-2xl overflow-hidden border border-zinc-700'
+                        imgDiv.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`
+                        previewContainer.appendChild(imgDiv)
+                    }
+                    reader.readAsDataURL(file)
+                })
+            })
+        }
+        
+        function toggleSearch() {
+            const term = prompt('검색어를 입력하세요 (멤버, 내용, era...)')
+            if (term) {
+                alert(`"${term}" 검색 결과 (실제 구현 시 필터링됩니다)`)
+            }
+        }
+        
+        function toggleMobileMenu() {
+            alert('모바일 메뉴는 사이드바와 동일합니다.')
+        }
+        
+        function filterTwitterPosts() {
+            // Can be expanded
+            renderTwitterFeed()
+        }
+        
+        function filterWeversePosts() {
+            renderWeverseFeed()
+        }
+        
+        // Initialize everything
+        function initializeApp() {
+            initTailwind()
+            seedInitialData()
+            renderMembers()
+            populateMemberSelects()
+            
+            renderTwitterFeed()
+            renderWeverseFeed()
+            renderInstagramFeed()
+            renderStories()
+            
+            setupFileUpload()
+            
+            // Default platform
+            switchPlatform(0)
+            
+            // Prevent double tap zoom
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault()
+                }
+            }, { passive: false })
+            
+            console.log('%cCLÖW Archive 초기화 완료', 'color:#a855f7; font-family:monospace')
+        }
+        
+        window.onload = initializeApp
+    </script>
 </body>
 </html>
+```
