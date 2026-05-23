@@ -150,7 +150,7 @@
       const [searchQuery, setSearchQuery] = useState('');
       const [viewerData, setViewerData] = useState(null);
       const [editingPost, setEditingPost] = useState(null);
-      const [dialogConfig, setDialogConfig] = useState(null); // 커스텀 모달 설정
+      const [dialogConfig, setDialogConfig] = useState(null);
 
       const dialogs = {
         alert: (msg) => setDialogConfig({ type: 'alert', message: msg }),
@@ -175,14 +175,18 @@
 
       // Firebase Auth & Data
       useEffect(() => {
-        auth.signInAnonymously().catch(console.error);
+        auth.signInAnonymously().catch((error) => {
+          console.error("Auth Error:", error);
+          if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
+            alert("Firebase 인증 에러: 파이어베이스 콘솔에서 'Authentication -> Sign-in method -> 익명(Anonymous) 로그인'을 활성화해주세요.");
+          }
+        });
         const unsubscribeAuth = auth.onAuthStateChanged(setUser);
         return () => unsubscribeAuth();
       }, []);
 
       useEffect(() => {
-        if (!user) return;
-        
+        // 인증 전에도 데이터를 읽을 수 있도록 블로킹 조건(!user) 제거
         const postsRef = db.collection(`artifacts/${appId}/public/data/posts`);
         const storiesRef = db.collection(`artifacts/${appId}/public/data/stories`);
         const profilesRef = db.collection(`artifacts/${appId}/public/data/profiles`);
@@ -206,7 +210,7 @@
         });
 
         return () => { unsubPosts(); unsubStories(); unsubProfiles(); };
-      }, [user]);
+      }, []); // user 의존성 배열 제거
 
       const filteredPosts = useMemo(() => {
         return posts.filter(post => {
@@ -222,12 +226,13 @@
       }, [posts, currentTab, selectedMembers, searchQuery]);
 
       const handleLike = async (postId, currentLikes) => {
-        if (!user) return;
+        if (!user) return dialogs.alert("로그인이 필요합니다. 파이어베이스 인증 설정을 확인해주세요.");
         await db.doc(`artifacts/${appId}/public/data/posts/${postId}`).update({ likes: (currentLikes || 0) + 1 });
       };
 
       const handleDelete = (postId) => {
         dialogs.confirm("이 게시글을 삭제하시겠습니까?", async () => {
+          if (!user) return dialogs.alert("로그인이 필요합니다.");
           await db.doc(`artifacts/${appId}/public/data/posts/${postId}`).delete();
         });
       };
@@ -737,7 +742,7 @@
 
       const handleSubmitPost = async (e) => {
         e.preventDefault();
-        if (!user) return dialogs.alert("인증 오류.");
+        if (!user) return dialogs.alert("인증 오류: 파이어베이스 콘솔에서 '익명 로그인'을 활성화해주세요.");
         if (platform === PLATFORMS.INSTAGRAM && files.length === 0) return dialogs.alert("인스타그램은 반드시 이미지가 포함되어야 합니다.");
         
         setUploading(true);
@@ -778,7 +783,7 @@
 
       const handleSubmitStory = async (e) => {
         e.preventDefault();
-        if (!user) return;
+        if (!user) return dialogs.alert("인증 오류: 파이어베이스 콘솔에서 '익명 로그인'을 활성화해주세요.");
         if (files.length === 0) return dialogs.alert("스토리 이미지를 선택하세요.");
         setUploading(true);
         try {
@@ -792,7 +797,7 @@
 
       const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        if (!user) return;
+        if (!user) return dialogs.alert("인증 오류: 파이어베이스 콘솔에서 '익명 로그인'을 활성화해주세요.");
         setUploading(true);
         try {
           let picUrl = profiles[member]?.pic || '';
