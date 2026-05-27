@@ -860,12 +860,6 @@ a { text-decoration: none; color: inherit; }
 .prof-card-name { font-size: 14px; font-weight: 700; text-align: center; }
 .prof-card-handle { font-size: 12px; color: var(--text2); }
 
-
-.hash-tag{
-  color:#1d9bf0;
-  font-weight:500;
-}
-
 /* ============================================================
    SHARED UI
    ============================================================ */
@@ -1247,7 +1241,22 @@ a { text-decoration: none; color: inherit; }
           <label class="a-label">멤버</label>
           <div class="member-grid" id="a-member-grid"></div>
         </div>
-        
+        <div class="a-section">
+          <label class="a-label">ERA 태그</label>
+          <input class="a-input" type="text" id="a-era" placeholder="예: CLAP, LOVE DIVE, After LIKE">
+        </div>
+        <div class="a-section">
+          <label class="a-label">게시 날짜</label>
+          <input class="a-input" type="datetime-local" id="a-date">
+        </div>
+        <div class="a-section">
+          <label class="a-label">내용</label>
+          <textarea class="a-textarea" id="a-content" placeholder="내용을 입력하세요"></textarea>
+        </div>
+        <div class="a-section" id="a-secret-row" style="display:none;">
+          <div class="toggle-row">
+            <span class="toggle-label-text">🔒 비밀포스트</span>
+            <div class="tog" id="a-secret-tog" onclick="toggleSecret()"><div class="tog-knob"></div></div>
           </div>
           <div id="a-pw-row" style="display:none;margin-top:8px;">
             <input class="a-input" type="password" id="a-pw" placeholder="비밀번호">
@@ -1445,13 +1454,6 @@ let unlockedIds = new Set();
 let pendingPwId = null;
 let lbImgs = [], lbIdx = 0, lbTouchX = 0;
 let svList = [], svIdx = 0, svTimer = null;
-function formatTags(text=''){
-  return text.replace(/(^|\s)#([A-Za-z0-9가-힣_]+)/g,(m,sp,tag)=>{
-    if(/[😀-🙏🌀-🗿]/u.test(tag)) return m;
-    return `${sp}<span class="hash-tag">#${tag}</span>`;
-  });
-}
-
 
 // ============================================================
 // BOOT
