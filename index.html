@@ -611,15 +611,25 @@ a { text-decoration: none; color: inherit; }
   background: #000;
   aspect-ratio: 1/1;
   overflow: hidden;
+  /* container query context for slide sizing */
+  container-type: size;
+  container-name: carousel;
 }
 .ig-carousel-track {
   display: flex;
+  width: 100%;
   height: 100%;
   transition: transform 0.3s cubic-bezier(.4,0,.2,1);
   will-change: transform;
 }
-.ig-carousel-slide { flex-shrink: 0; width: 100%; height: 100%; }
-.ig-carousel-slide img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+/* Each slide takes exactly the carousel container width */
+.ig-carousel-slide {
+  flex: 0 0 100%;   /* <- 핵심: 100cqw 대신 flex-basis 100% (트랙 기준 아닌 carousel 기준) */
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.ig-carousel-slide img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; display: block; }
 
 .ig-carousel-dots {
   position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
@@ -1344,6 +1354,15 @@ a { text-decoration: none; color: inherit; }
   <div class="edit-sheet">
     <h3 id="edit-title">프로필 편집</h3>
     <div class="a-section">
+      <label class="a-label">플랫폼</label>
+      <select class="a-select" id="edit-platform" onchange="openEdit(editingMember)">
+        <option value="twitter">Twitter</option>
+        <option value="weverse">Weverse</option>
+        <option value="instagram">Instagram</option>
+      </select>
+    </div>
+
+    <div class="a-section">
       <label class="a-label">프로필 사진</label>
       <div class="img-drop" style="padding:16px;" onclick="document.getElementById('prof-img-in').click()">
         <div id="prof-img-preview" style="text-align:center;">
@@ -1604,18 +1623,40 @@ async function loadProfiles() {
   for (const m of MEMBERS) {
     try {
       const s = await getDoc(doc(db,'profiles',m));
-      profiles[m] = s.exists() ? s.data() : defaultProfile(m);
+      const data = s.exists() ? s.data() : defaultProfile(m);
+      profiles[m] = (!data.twitter && (data.name || data.photo || data.handle))
+        ? { twitter:data, weverse:{...data}, instagram:{...data} }
+        : data;
     } catch { profiles[m] = defaultProfile(m); }
   }
   buildProfCards();
 }
-function defaultProfile(m) { return { name:m, handle:'@'+m.toLowerCase().replace(/\s/g,''), bio:'', photo:'' }; }
+function baseProfile(m){ return { name:m, handle:'@'+m.toLowerCase().replace(/\s/g,''), bio:'', photo:'' }; }
+
+function defaultProfile(m) {
+  return {
+    twitter: baseProfile(m),
+    weverse: baseProfile(m),
+    instagram: baseProfile(m)
+  };
+}
+
+function getProfile(m, plat=platform) {
+  const p = profiles[m] || defaultProfile(m);
+
+  // old data migration
+  if (!p.twitter && (p.name || p.photo || p.handle)) {
+    return { ...baseProfile(m), ...p };
+  }
+
+  return p[plat] || p.twitter || baseProfile(m);
+}
 
 function buildProfCards() {
   const el = document.getElementById('prof-cards');
   el.innerHTML = '';
   MEMBERS.forEach((m,i) => {
-    const p = profiles[m]||defaultProfile(m);
+    const p = getProfile(m,'twitter');
     const card = mk('div','prof-card');
     card.innerHTML = `
       <div class="prof-card-av" id="pav-${i}">${p.photo?`<img src="${p.photo}" alt="">`:(EMOJIS[i]||'👤')}</div>
@@ -1651,15 +1692,21 @@ function buildAdminGrids() {
 // ============================================================
 window.openEdit = function(m) {
   editingMember = m; profImgFile = null;
-  const p = profiles[m]||defaultProfile(m);
+
+  const plat = document.getElementById('edit-platform')?.value || 'twitter';
+  const p = getProfile(m, plat);
+
   document.getElementById('edit-title').textContent = m+' 프로필 편집';
+  document.getElementById('edit-platform').value = plat;
   document.getElementById('edit-name').value = p.name||m;
   document.getElementById('edit-handle').value = p.handle||'';
   document.getElementById('edit-bio').value = p.bio||'';
+
   const prev = document.getElementById('prof-img-preview');
   prev.innerHTML = p.photo
     ? `<img src="${p.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`
     : `<div style="font-size:28px;">👤</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>`;
+
   document.getElementById('edit-overlay').classList.add('open');
 };
 window.editClose = () => document.getElementById('edit-overlay').classList.remove('open');
@@ -1677,18 +1724,25 @@ window.handleProfImg = function(e) {
 
 window.editSave = async function() {
   if (!editingMember) return;
+
   toast('저장 중...');
-  let photo = profiles[editingMember]?.photo||'';
+
+  const plat = document.getElementById('edit-platform').value;
+  const current = profiles[editingMember] || defaultProfile(editingMember);
+
+  let photo = getProfile(editingMember, plat)?.photo || '';
   if (profImgFile) photo = await uploadCld(profImgFile);
-  const data = {
+
+  current[plat] = {
     name: document.getElementById('edit-name').value,
     handle: document.getElementById('edit-handle').value,
     bio: document.getElementById('edit-bio').value,
     photo
   };
+
   try {
-    await setDoc(doc(db,'profiles',editingMember), data);
-    profiles[editingMember] = data;
+    await setDoc(doc(db,'profiles',editingMember), current);
+    profiles[editingMember] = current;
     buildProfCards();
     renderCurrent();
     editClose();
@@ -2010,7 +2064,7 @@ function igCard(p) {
   const imgs = p.images||[];
   const liked = localStorage.getItem('liked_'+p.id)==='1';
   const likes = (p.likes||0)+(liked?1:0);
-  const pr = profiles[p.member]||defaultProfile(p.member);
+  const pr = getProfile(p.member,'instagram');
   const carousel = imgs.length>1;
 
   const avInner = pr.photo
@@ -2037,7 +2091,7 @@ function igCard(p) {
       </div>
     </div>
     <div class="ig-carousel" data-idx="0">
-      <div class="ig-carousel-track" style="width:${imgs.length*100}%">${slides}</div>
+      <div class="ig-carousel-track">${slides}</div>
       ${dots}${prevBtn}${nextBtn}${multiIcon}
     </div>
     <div class="ig-actions">
@@ -2068,7 +2122,7 @@ function renderStories() {
     return;
   }
   bar.innerHTML = Object.entries(byMember).map(([m,ss]) => {
-    const pr = profiles[m]||defaultProfile(m);
+    const pr = getProfile(m,'instagram');
     const inner = pr.photo ? `<img src="${pr.photo}" alt="${m}">` : EMOJIS[MEMBERS.indexOf(m)]||'👤';
     return `<div class="ig-story-item" onclick="svOpen('${m}')">
       <div class="ig-story-ring"><div class="ig-story-inner">${inner}</div></div>
@@ -2129,7 +2183,7 @@ window.igNext = function(btn) {
   const slides=c.querySelectorAll('.ig-carousel-slide');
   const idx=Math.min(parseInt(c.dataset.idx||0)+1,slides.length-1);
   c.dataset.idx=idx;
-  track.style.transform=`translateX(-${idx*(100/slides.length)}%)`;
+  track.style.transform=`translateX(-${idx*c.clientWidth}px)`;
   c.querySelectorAll('.ig-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 };
 window.igPrev = function(btn) {
@@ -2139,7 +2193,7 @@ window.igPrev = function(btn) {
   const slides=c.querySelectorAll('.ig-carousel-slide');
   const idx=Math.max(parseInt(c.dataset.idx||0)-1,0);
   c.dataset.idx=idx;
-  track.style.transform=`translateX(-${idx*(100/slides.length)}%)`;
+  track.style.transform=`translateX(-${idx*c.clientWidth}px)`;
   c.querySelectorAll('.ig-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 };
 
