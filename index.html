@@ -1232,7 +1232,7 @@ a { text-decoration: none; color: inherit; }
         <div class="a-section">
           <label class="a-label">플랫폼</label>
           <select class="a-select" id="a-platform" onchange="onPlatformChange()">
-            <option value="twitter">Twitter</option>
+            <option value="twitter" selected>Twitter</option>
             <option value="weverse">Weverse</option>
             <option value="instagram">Instagram</option>
           </select>
@@ -1356,7 +1356,7 @@ a { text-decoration: none; color: inherit; }
     <div class="a-section">
       <label class="a-label">플랫폼</label>
       <select class="a-select" id="edit-platform" onchange="if(editingMember) openEdit(editingMember)">
-        <option value="twitter">Twitter</option>
+        <option value="twitter" selected>Twitter</option>
         <option value="weverse">Weverse</option>
         <option value="instagram">Instagram</option>
       </select>
@@ -1946,7 +1946,7 @@ window.renderTwitter = function() {
 };
 
 function twCard(p) {
-  const handle = profiles[p.member]?.handle || ('@'+p.member.toLowerCase().replace(/\s/g,''));
+  const handle = getProfile(p.member, 'twitter').handle || ('@'+p.member.toLowerCase().replace(/\s/g,''));
   const date = fmtDate(getDate(p.timestamp));
   const imgs = p.images||[];
   const liked = localStorage.getItem('liked_'+p.id)==='1';
