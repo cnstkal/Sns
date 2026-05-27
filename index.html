@@ -1355,7 +1355,7 @@ a { text-decoration: none; color: inherit; }
     <h3 id="edit-title">프로필 편집</h3>
     <div class="a-section">
       <label class="a-label">플랫폼</label>
-      <select class="a-select" id="edit-platform" onchange="openEdit(editingMember)">
+      <select class="a-select" id="edit-platform" onchange="if(editingMember) openEdit(editingMember)">
         <option value="twitter">Twitter</option>
         <option value="weverse">Weverse</option>
         <option value="instagram">Instagram</option>
@@ -1702,21 +1702,24 @@ function buildAdminGrids() {
 // PROFILE EDIT
 // ============================================================
 window.openEdit = function(m) {
-  editingMember = m; profImgFile = null;
+  editingMember = m;
+  profImgFile = null;
 
-  const plat = document.getElementById('edit-platform')?.value || 'twitter';
+  const plat = document.getElementById('edit-platform').value;
   const p = getProfile(m, plat);
 
-  document.getElementById('edit-title').textContent = m+' 프로필 편집';
-  document.getElementById('edit-platform').value = plat;
-  document.getElementById('edit-name').value = p.name||m;
-  document.getElementById('edit-handle').value = p.handle||'';
-  document.getElementById('edit-bio').value = p.bio||'';
+  document.getElementById('edit-title').textContent = `${m} · ${plat}`;
+  document.getElementById('edit-name').value = p.name || '';
+  document.getElementById('edit-handle').value = p.handle || '';
+  document.getElementById('edit-bio').value = p.bio || '';
 
   const prev = document.getElementById('prof-img-preview');
-  prev.innerHTML = p.photo
-    ? `<img src="${p.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`
-    : `<div style="font-size:28px;">👤</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>`;
+
+  if (p.photo) {
+    prev.innerHTML = `<img src="${p.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;">`;
+  } else {
+    prev.innerHTML = `<div style="font-size:28px;">👤</div><div style="font-size:13px;color:var(--text2);margin-top:4px;">이미지 선택</div>`;
+  }
 
   document.getElementById('edit-overlay').classList.add('open');
 };
@@ -2075,7 +2078,7 @@ function igCard(p) {
   const imgs = p.images||[];
   const liked = localStorage.getItem('liked_'+p.id)==='1';
   const likes = (p.likes||0)+(liked?1:0);
-  const pr = getProfile(p.member,'instagram');
+  const pr = getProfile(p.member, 'instagram');
   const carousel = imgs.length>1;
 
   const avInner = pr.photo
