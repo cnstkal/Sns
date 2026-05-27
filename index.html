@@ -1959,10 +1959,10 @@ function twCard(p) {
   else if (imgs.length>=4) imgHtml=`<div class="tw-imgs tw-img-4">${imgs.slice(0,4).map((u,i)=>`<img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})">`).join('')}</div>`;
 
   return `<div class="tweet-card" data-id="${p.id}">
-    <div>${avatar(p.member,40)}</div>
+    <div>${avatar(p.member,40,"tw-av","twitter")}</div>
     <div class="tw-body">
       <div class="tw-meta">
-        <span class="tw-name">${p.member}</span>
+        <span class="tw-name">${getProfile(p.member,"twitter").name}</span>
         <span class="tw-handle">${handle}</span>
         <span class="tw-dot">·</span>
         <span class="tw-time">${date}</span>
@@ -2029,9 +2029,9 @@ function wvCard(p) {
 
   return `<div class="wv-card" data-id="${p.id}">
     <div class="wv-card-head">
-      ${avatar(p.member,42,'wv-av')}
+      ${avatar(p.member,42,"wv-av","weverse")}
       <div class="wv-meta">
-        <div class="wv-name">${p.member}</div>
+        <div class="wv-name">${getProfile(p.member,"weverse").name}</div>
         <div class="wv-time">${date}</div>
       </div>
       ${p.era?`<span class="wv-era-tag">${p.era}</span>`:''}
@@ -2082,7 +2082,7 @@ function igCard(p) {
   const carousel = imgs.length>1;
 
   const avInner = pr.photo
-    ? `<img src="${pr.photo}" alt="${p.member}">`
+    ? `<img src="${pr.photo}" alt="${getProfile(p.member,"weverse").name}">`
     : `<span style="font-size:14px;font-weight:700;">${EMOJIS[MEMBERS.indexOf(p.member)]||'👤'}</span>`;
 
   const slides = imgs.map((u,i)=>`<div class="ig-carousel-slide"><img src="${u}" loading="lazy" onclick="openLb(${esc(imgs)},${i})"></div>`).join('');
@@ -2095,7 +2095,7 @@ function igCard(p) {
     <div class="ig-card-head">
       <div class="ig-card-av"><div class="ig-card-av-inner">${avInner}</div></div>
       <div>
-        <div class="ig-card-name">${p.member}</div>
+        <div class="ig-card-name">${getProfile(p.member,"weverse").name}</div>
         <div class="ig-card-sub">${p.era||''}${p.era&&date?' · ':''}${date}</div>
       </div>
       <button class="post-more-btn" style="position:relative;top:auto;right:auto;margin-left:auto;" onclick="openDD('${p.id}',event)">···</button>
@@ -2115,7 +2115,7 @@ function igCard(p) {
       <button class="ig-act-btn ig-bookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></button>
     </div>
     <div class="ig-likes">좋아요 <span id="lc-${p.id}">${fmtN(likes)}</span>개</div>
-    ${p.content?`<div class="ig-caption"><span class="n">${p.member}</span> ${xss(p.content)}</div>`:''}
+    ${p.content?`<div class="ig-caption"><span class="n">${getProfile(p.member,"weverse").name}</span> ${xss(p.content)}</div>`:''}
     <div class="ig-date">${date.toUpperCase ? date.toUpperCase() : date}</div>
   </div>`;
 }
@@ -2295,10 +2295,15 @@ document.addEventListener('keydown',e=>{
 // ============================================================
 function mk(tag,cls){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
 
-function avatar(member,size,extraCls='tw-av') {
-  const p=profiles[member]; const i=MEMBERS.indexOf(member);
+function avatar(member,size,extraCls='tw-av',plat=platform) {
+  const p = getProfile(member, plat);
+  const i=MEMBERS.indexOf(member);
   const emoji=EMOJIS[i]||'👤';
-  if(p?.photo) return `<div class="${extraCls}" style="width:${size}px;height:${size}px;"><img src="${p.photo}" alt="${member}"></div>`;
+
+  if(p?.photo) {
+    return `<div class="${extraCls}" style="width:${size}px;height:${size}px;"><img src="${p.photo}" alt="${member}"></div>`;
+  }
+
   return `<div class="${extraCls}" style="width:${size}px;height:${size}px;font-size:${size*.4}px;">${emoji}</div>`;
 }
 
