@@ -1644,19 +1644,30 @@ function defaultProfile(m) {
 function getProfile(m, plat=platform) {
   const p = profiles[m] || defaultProfile(m);
 
-  // old data migration
   if (!p.twitter && (p.name || p.photo || p.handle)) {
-    return { ...baseProfile(m), ...p };
+    return {
+      name: p.name || m,
+      handle: p.handle || '@'+m.toLowerCase().replace(/\s/g,''),
+      bio: p.bio || '',
+      photo: p.photo || ''
+    };
   }
 
-  return p[plat] || p.twitter || baseProfile(m);
+  const target = p[plat] || p.twitter || baseProfile(m);
+
+  return {
+    name: target.name || m,
+    handle: target.handle || '@'+m.toLowerCase().replace(/\s/g,''),
+    bio: target.bio || '',
+    photo: target.photo || ''
+  };
 }
 
 function buildProfCards() {
   const el = document.getElementById('prof-cards');
   el.innerHTML = '';
   MEMBERS.forEach((m,i) => {
-    const p = getProfile(m,'twitter');
+    const p = getProfile(m, 'instagram');
     const card = mk('div','prof-card');
     card.innerHTML = `
       <div class="prof-card-av" id="pav-${i}">${p.photo?`<img src="${p.photo}" alt="">`:(EMOJIS[i]||'👤')}</div>
